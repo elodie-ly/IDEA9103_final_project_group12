@@ -40,8 +40,16 @@ Our team will reinterpret Manolo Gamboa Naon’s *CUDA*, a colourful generative 
 
 
 
-## Mechanic 1: Time-Based Mechanic
+## Mechanic 1: Audio mechanic
 
+**Owner:** Yibei Yang / yibeiyang04  
+**Mechanic:** Use audio level and frequency data to drive the mechanic.
+
+The audio mechanic will use music frequency data to influence the behaviour of the generative abstract ecosystem. Different sound frequencies and volume levels will affect particle movement, shape scaling, transparency, colour intensity, and animation speed in real time.
+
+For example, low-frequency sounds may cause larger circular forms to slowly pulse and expand, while high-frequency sounds may generate faster movement, flickering particles, or sudden bursts of colour. The system will visually react to sound energy, creating a strong connection between audio and motion.
+
+This mechanic supports the project vision by transforming the artwork into a dynamic audiovisual environment rather than a static composition. The constantly changing sound input will make the ecosystem feel immersive, organic, and unpredictable.
 
 
 
