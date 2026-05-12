@@ -12,10 +12,10 @@ Our team has chosen to **reinterpret an existing artwork**.
 **Source:** Behance  
 **Link:** https://www.behance.net/gallery/66472289/CUDA
 **picture:** 
-![1_CUDA_Manolo Gamboa Naon](images/1_CUDA_Manolo%20Gamboa%20Naon.png)
-![2_CUDA_Manolo Gamboa Naon](images/2_CUDA_Manolo%20Gamboa%20Naon.png)
-![3_CUDA_Manolo Gamboa Naon](images/3_CUDA_Manolo%20Gamboa%20Naon.png)
-![4_CUDA_Manolo Gamboa Naon](images/4_CUDA_Manolo%20Gamboa%20Naon.png)
+![1_CUDA_Manolo Gamboa Naon](assets/1_CUDA_Manolo%20Gamboa%20Naon.png)
+![2_CUDA_Manolo Gamboa Naon](assets/2_CUDA_Manolo%20Gamboa%20Naon.png)
+![3_CUDA_Manolo Gamboa Naon](assets/3_CUDA_Manolo%20Gamboa%20Naon.png)
+![4_CUDA_Manolo Gamboa Naon](assets/4_CUDA_Manolo%20Gamboa%20Naon.png)
 
 
 ---
