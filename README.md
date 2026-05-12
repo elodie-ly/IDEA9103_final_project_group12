@@ -26,7 +26,8 @@ Our team will reinterpret Manolo Gamboa Naon’s *CUDA*, a colourful generative 
 
 ---
 
-## Team Members and Mechanics
+
+# Part2: Team Members and Mechanics
 
 | Team Member | Mechanic |
 |---|---|
@@ -89,3 +90,19 @@ if (frameCount % 600 === 0) {
 ---
 
 ## Mechanic 4: Time-Based Mechanic
+
+
+
+
+
+
+
+
+---
+
+
+# Part3: How the Mechanics Come Together
+
+All four mechanics will share one canvas as layered systems. The Perlin noise mechanic creates a flowing background field, the time-based mechanic changes colour phases and triggers events, the audio mechanic makes circles and particles pulse with sound, and the user input mechanic lets the audience disturb or reshape the composition. They influence each other through shared colours, transparency, and repeated geometric forms. Visually, the project is held together by the *CUDA*-inspired style: overlapping circles, rectangles, lines, warm/cool contrast, and dense abstract movement.
+
+---
