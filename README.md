@@ -31,7 +31,7 @@ Our team will reinterpret Manolo Gamboa Naon’s *CUDA*, a colourful generative 
 
 | Team Member | Mechanic |
 |---|---|
-| yibei yang(Amber) /  | Audio mechanic |
+| yibei yang(Amber) /  yyan0553 | Audio mechanic |
 | yunyi liu(Elodie) / yliu0027 | Time-based mechanic |
 | hanwen cui /   | Perlin noise and randomness mechanic |
 | xinyue zhang /   | User input mechanic |
