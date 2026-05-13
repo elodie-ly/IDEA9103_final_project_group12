@@ -62,26 +62,51 @@ This mechanic supports the project vision by transforming the artwork into a dyn
 **Owner:** yunyi liu(Elodie) / yliu0027
 **Mechanic:** Employ timers and events to drive the mechanic.
 
-The time-based mechanic will control the main visual rhythm of the artwork. Inspired by the changing density and layered composition of *CUDA*, this mechanic will use timers to create different visual phases. For example, every 8–10 seconds, the canvas can shift between a warm phase, a cool phase, a high-energy phase, and a calm phase. In each phase, the background colour, transparency, shape speed, and rotation amount will change. Timed events can also trigger new circles, rectangles, or line bursts to appear automatically. The user does not need to do anything for this mechanic to work; the artwork will continuously evolve by itself. This connects to our vision because it turns the original static image into a living generative system. The timed changes help the canvas feel like an active digital artwork rather than a still poster.
+The time-based mechanic will act as the main visual director of our CUDA-inspired interactive artwork. Instead of simply changing colours, this mechanic will organise the whole canvas into a repeating sequence of visual phases and timed events. The artwork will move through four main phases: warm build-up, cool drift, energy burst, and dark reset. Each phase will last for a set amount of time and will change how the shapes behave. For example, during the warm build-up phase, orange and red circles will slowly expand and overlap. In the cool drift phase, blue and green rectangles will move more softly across the screen. During the energy burst phase, the canvas will generate faster rotating circles, bright lines, and sudden particle explosions. In the dark reset phase, the movement slows down and the shapes fade, preparing the canvas for the next cycle.
 
 ### Time-Based Mechanic Diagram
 
-```text
-0–10 sec: warm orange/red phase
-10–20 sec: cool blue/green phase
-20–30 sec: bright yellow energy burst
-30–40 sec: darker layered calm phase
-then repeat
+```FULL TIME-BASED VISUAL FLOW
+
+┌──────────────────────────────┐
+│  Phase 1: Warm Build-up      │
+│  0–10 sec                    │
+│  ○  ◯   ◎    ○             │
+│  red / orange / yellow       │
+│  slow expansion              │
+└───────────────┬──────────────┘
+                │
+                v
+┌──────────────────────────────┐
+│  Phase 2: Cool Drift         │
+│  10–20 sec                   │
+│  ▬     ▭      ○             │
+│  blue / cyan / green         │
+│  floating rectangles         │
+└───────────────┬──────────────┘
+                │
+                v
+┌────────────────────────────────┐
+│  Phase 3: Energy Burst         │
+│  20–30 sec                     │
+│  ✦  ◎  ✦  ○  ✦               │
+│  yellow / white / red          │
+│  fast rotation + particle burst│
+└───────────────┬────────────────┘
+                │
+                v
+┌──────────────────────────────┐
+│  Phase 4: Dark Reset         │
+│  30–40 sec                   │
+│  .    ○      .               │
+│  dark blue / purple / black  │
+│  fade out + slow movement    │
+└───────────────┬──────────────┘
+                │
+                v
+             Repeat
+
 ```
-
-### p5.js Code Idea
-
-```javascript
-if (frameCount % 600 === 0) {
-  phase = (phase + 1) % 4;
-}
-```
-
 ---
 
 
