@@ -33,8 +33,8 @@ Our team will reinterpret Manolo Gamboa Naon’s *CUDA*, a colourful generative 
 |---|---|
 | yibei yang(Amber) /  yyan0553 | Audio mechanic |
 | yunyi liu(Elodie) / yliu0027 | Time-based mechanic |
-| hanwen cui /   | Perlin noise and randomness mechanic |
-| xinyue zhang /   | User input mechanic |
+| hanwen cui /hcui0590   | Perlin noise and randomness mechanic |
+| xinyue zhang /xzha0936   | User input mechanic |
 
 ---
 
@@ -110,26 +110,25 @@ The time-based mechanic will act as the main visual director of our CUDA-inspire
 ---
 
 
-## Mechanic 3: Time-Based Mechanic
+## Mechanic 3: Perlin noise and randomness mechanic
+**Owner:** Hanwen Cui / hcui0590
+**Mechanic:** Use Perlin noise and randomness to drive the mechanic.
 
+My mechanic will use Perlin noise and random values to create the flowing and unpredictable parts of our CUDA-inspired artwork. The main role of this mechanic is to make the composition feel alive instead of static. Perlin noise will control the slow movement of circles, lines, triangles, and translucent geometric fragments, so they drift smoothly across the canvas rather than moving in a stiff or mechanical way. Random values or a random seed will be used to generate different shape sizes, positions, rotations, colours, and transparency levels.
 
-
-
-
-
-
-
+The user does not directly control this mechanic, but they will experience it through the changing visual atmosphere. Each time the artwork runs, the layout can feel slightly different, while still keeping the same overall CUDA-inspired style. This connects to our project vision because Manolo Gamboa Naon’s work uses many overlapping shapes, rich colours, and a feeling of controlled chaos. My mechanic will help recreate that dense abstract feeling in p5.js, while also making it move like a living generative system.
 
 ---
 
-## Mechanic 4: Time-Based Mechanic
+## Mechanic 4:  User input mechanic
 
+**Owner:** Xinyue Zhang / xzha0936
 
+**Mechanic:** Employ timers and events to drive the mechanic.
 
-
-
-
-
+The mouse and keyboard controls will make the artwork feel more interactive and alive. Instead of the visuals running on their own all the time, the audience can change what happens on the screen through simple actions. Moving the mouse will affect how the shapes and particles move, making them follow, avoid, or react to the cursor. Clicking the mouse can create quick energy explosions, bright flashes, or spinning effects across the canvas.
+The keyboard will let users control different visual modes and effects. For example, pressing certain keys can switch between the warm build-up, cool drift, energy burst, and dark reset phases. Other keys can speed up movement, increase the number of particles, pause the animation, or trigger extra visual effects.
+By adding mouse and keyboard interaction, the artwork becomes more playful and immersive because the audience is able to influence the visuals in real time instead of only watching a looping animation.
 
 ---
 
