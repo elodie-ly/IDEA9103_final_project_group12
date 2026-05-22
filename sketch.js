@@ -1,315 +1,398 @@
-let warmPalette;
-let coolPalette;
-let lightPalette;
-
 function setup() {
-  createCanvas(canvasWidth, canvasHeight);
-  angleMode(DEGREES);
+  createCanvas(windowWidth, windowHeight);
   noLoop();
-  noStroke();
+  angleMode(DEGREES);
+  colorMode(RGB, 255, 255, 255, 255);
+}
 
-  // 固定随机种子，让每次画面保持一致
-  randomSeed(18);
+function draw() {
+  background(4, 66, 70);
 
-  warmPalette = [
-    color(255, 90, 35, 90),
-    color(255, 140, 40, 80),
-    color(255, 190, 60, 80),
-    color(230, 45, 50, 70),
-    color(255, 220, 90, 70)
-  ];
+  let s = min(width, height);
+  let ox = (width - s) / 2;
+  let oy = (height - s) / 2;
 
-  coolPalette = [
-    color(0, 120, 150, 70),
-    color(0, 160, 170, 65),
-    color(20, 90, 120, 70),
-    color(10, 60, 90, 75),
-    color(30, 140, 130, 60),
-    color(0, 80, 110, 70)
-  ];
+  push();
+  translate(ox, oy);
+  scale(s / 1024);
 
-  lightPalette = [
-    color(220, 240, 255, 70),
-    color(180, 220, 255, 60),
-    color(255, 245, 210, 65),
-    color(255, 210, 170, 55)
-  ];
+  drawBackground();
+  drawLargeTransparentCircles();
+  drawMainPolygons();
+  drawLightBeams();
+  drawDarkCircularNodes();
+  drawBrightCircles();
+  drawFineLines();
+  drawSmallDetails();
+  drawVignette();
+
+  pop();
 }
 
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
-  randomSeed(18); // 保持随机元素位置一致
   redraw();
-
 }
 
-function draw() {
-  drawBackground();
-  drawLargeColourFields();
-  drawTransparentGeometry();
-  drawCircleDiscs();
-  drawLightBeams();
-  drawSmallDetails();
-  drawTexture();
-  //drawVignette();
-}
-
-// 深色青蓝背景
+// ============================
+// 1. Background base
+// ============================
 function drawBackground() {
-  background(7, 38, 48);
-
-  for (let i = 0; i < 220; i++) {
-    let c = random(coolPalette);
-    fill(red(c), green(c), blue(c), random(15, 45));
-
-    let x = random(width);
-    let y = random(height);
-    let s = random(120, 420);
-
-    ellipse(x, y, s, s);
-  }
-}
-
-// 大面积暖色和冷色区域
-function drawLargeColourFields() {
-  push();
-  blendMode(SCREEN);
-
-  // 左下和中部偏暖
-  for (let i = 0; i < 26; i++) {
-    let c = random(warmPalette);
-    fill(red(c), green(c), blue(c), random(35, 80));
-
-    let x = random(-150, width * 0.65);
-    let y = random(height * 0.25, height + 120);
-    let w = random(180, 520);
-    let h = random(120, 420);
-
-    push();
-    translate(x, y);
-    rotate(random(-45, 45));
-    rect(0, 0, w, h);
-    pop();
-  }
-
-  // 右侧和上方偏冷
-  for (let i = 0; i < 36; i++) {
-    let c = random(coolPalette);
-    fill(red(c), green(c), blue(c), random(35, 75));
-
-    let x = random(width * 0.2, width + 80);
-    let y = random(-80, height);
-    let w = random(160, 460);
-    let h = random(120, 380);
-
-    push();
-    translate(x, y);
-    rotate(random(-60, 60));
-    rect(0, 0, w, h);
-    pop();
-  }
-
-  pop();
-}
-
-// 半透明三角形、四边形，制造参考图中的抽象层次
-function drawTransparentGeometry() {
-  push();
-  blendMode(SCREEN);
-
-  for (let i = 0; i < 90; i++) {
-    let paletteChoice = random() < 0.55 ? coolPalette : warmPalette;
-    let c = random(paletteChoice);
-
-    fill(red(c), green(c), blue(c), random(25, 70));
-
-    let x = random(width);
-    let y = random(height);
-    let s = random(70, 260);
-
-    push();
-    translate(x, y);
-    rotate(random(360));
-
-    if (random() < 0.65) {
-      triangle(
-        0, -s * random(0.2, 0.8),
-        s * random(0.5, 1.2), s * random(0.2, 0.8),
-        -s * random(0.5, 1.2), s * random(0.2, 0.8)
-      );
-    } else {
-      beginShape();
-      vertex(random(-s, s), random(-s, s));
-      vertex(random(-s, s), random(-s, s));
-      vertex(random(-s, s), random(-s, s));
-      vertex(random(-s, s), random(-s, s));
-      endShape(CLOSE);
-    }
-
-    pop();
-  }
-
-  pop();
-}
-
-// 画大量圆形光盘
-function drawCircleDiscs() {
-  push();
-  blendMode(SCREEN);
-
-  for (let i = 0; i < 55; i++) {
-    let c;
-
-    if (random() < 0.45) {
-      c = random(coolPalette);
-    } else if (random() < 0.8) {
-      c = random(warmPalette);
-    } else {
-      c = random(lightPalette);
-    }
-
-    let x = random(width);
-    let y = random(height);
-    let r = random(25, 150);
-
-    drawDisc(x, y, r, c);
-  }
-
-  // 几个主要大圆，模拟参考图中的视觉焦点
-  drawDisc(width * 0.5, height * 0.9, 135, color(0, 175, 230, 110));
-  drawDisc(width * 0.8, height * 0.8, 125, color(255, 210, 70, 100));
-  drawDisc(width * 0.6, height * 0.5, 75, color(255, 170, 45, 90));
-  drawDisc(width * 0.7, height * 0.8, 100, color(0, 120, 150, 90));
-  drawDisc(width * 0.8, height * 0.9, 65, color(255, 100, 40, 90));
-
-  pop();
-}
-
-// 带有放射渐变感觉的圆
-function drawDisc(x, y, r, c) {
-  push();
-  translate(x, y);
-
-  fill(red(c), green(c), blue(c), alpha(c));
-  ellipse(0, 0, r * 2, r * 2);
-
-  // 圆内扇形分割，接近图中“光盘”的感觉
-  for (let a = 0; a < 360; a += random(25, 55)) {
-    fill(255, 255, 255, random(6, 20));
-    arc(0, 0, r * 2, r * 2, a, a + random(10, 35), PIE);
-  }
-
-  // 中心暗点
-  fill(0, 40, 55, 100);
-  ellipse(0, 0, r * 0.16, r * 0.16);
-
-  // 中心亮点
-  fill(255, 230, 180, 130);
-  ellipse(0, 0, r * 0.05, r * 0.05);
-
-  pop();
-}
-
-// 光束、长条形、连接线
-function drawLightBeams() {
-  push();
-  blendMode(SCREEN);
-
-  for (let i = 0; i < 38; i++) {
-    let x = random(width);
-    let y = random(height);
-    let length = random(120, 520);
-    let thickness = random(15, 65);
-
-    let c = random() < 0.55 ? random(warmPalette) : random(lightPalette);
-    fill(red(c), green(c), blue(c), random(35, 85));
-
-    push();
-    translate(x, y);
-    rotate(random(360));
-
-    beginShape();
-    vertex(0, -thickness * 0.25);
-    vertex(length, -thickness);
-    vertex(length * 1.05, thickness);
-    vertex(0, thickness * 0.25);
-    endShape(CLOSE);
-
-    pop();
-  }
-
-  // 细连接线
-  strokeWeight(2);
-  for (let i = 0; i < 45; i++) {
-    let c = random(warmPalette);
-    stroke(red(c), green(c), blue(c), random(45, 100));
-
-    let x1 = random(width);
-    let y1 = random(height);
-    let x2 = x1 + random(-250, 250);
-    let y2 = y1 + random(-250, 250);
-
-    line(x1, y1, x2, y2);
-  }
-
   noStroke();
-  pop();
-}
 
-// 小点、小圆、小三角，增加画面复杂度
-function drawSmallDetails() {
-  push();
+  fill(5, 78, 78, 255);
+  rect(0, 0, 1024, 1024);
+
   blendMode(SCREEN);
 
-  for (let i = 0; i < 180; i++) {
-    let c = random() < 0.5 ? random(warmPalette) : random(coolPalette);
-    fill(red(c), green(c), blue(c), random(60, 130));
+  fill(0, 160, 150, 50);
+  rect(0, 0, 1024, 1024);
 
-    let x = random(width);
-    let y = random(height);
-    let s = random(3, 14);
+  fill(0, 95, 95, 90);
+  polygon([
+    [0, 0], [260, 0], [160, 300], [0, 240]
+  ]);
 
-    if (random() < 0.75) {
-      ellipse(x, y, s, s);
-    } else {
-      push();
-      translate(x, y);
-      rotate(random(360));
-      triangle(0, -s, s, s, -s, s);
-      pop();
-    }
-  }
+  fill(0, 135, 150, 70);
+  polygon([
+    [690, 0], [1024, 0], [1024, 210], [800, 170]
+  ]);
 
-  pop();
+  fill(0, 120, 95, 95);
+  polygon([
+    [0, 620], [260, 520], [410, 1024], [0, 1024]
+  ]);
+
+  fill(0, 70, 85, 120);
+  polygon([
+    [710, 600], [1024, 500], [1024, 1024], [820, 1024]
+  ]);
+
+  blendMode(BLEND);
 }
 
-// 轻微颗粒纹理，使画面更像数字绘画
-function drawTexture() {
-  loadPixels();
+// ============================
+// 2. Large transparent circles
+// ============================
+function drawLargeTransparentCircles() {
+  blendMode(SCREEN);
+  noStroke();
 
-  for (let i = 0; i < pixels.length; i += 4) {
-    let noiseAmount = random(-12, 12);
+  circleLayer(300, 90, 250, 0, 190, 205, 85);
+  circleLayer(415, 90, 330, 255, 160, 60, 75);
+  circleLayer(305, 270, 210, 255, 215, 75, 120);
 
-    pixels[i] += noiseAmount;
-    pixels[i + 1] += noiseAmount;
-    pixels[i + 2] += noiseAmount;
-  }
+  circleLayer(790, 100, 195, 250, 230, 95, 120);
+  circleLayer(865, 245, 230, 0, 180, 185, 85);
+  circleLayer(835, 325, 220, 255, 210, 70, 125);
 
-  updatePixels();
+  circleLayer(160, 370, 260, 190, 235, 255, 125);
+  circleLayer(170, 500, 235, 225, 238, 255, 85);
+
+  circleLayer(410, 505, 230, 255, 55, 55, 125);
+  circleLayer(500, 630, 255, 255, 170, 45, 80);
+
+  circleLayer(615, 725, 240, 255, 220, 90, 120);
+  circleLayer(740, 735, 260, 255, 80, 75, 100);
+
+  circleLayer(120, 845, 220, 255, 170, 55, 95);
+  circleLayer(335, 925, 235, 0, 165, 110, 130);
+  circleLayer(875, 820, 250, 0, 160, 185, 105);
+
+  circleLayer(75, 600, 145, 120, 215, 160, 70);
+  circleLayer(210, 820, 170, 0, 130, 160, 65);
+  circleLayer(940, 735, 170, 255, 80, 75, 70);
+
+  blendMode(BLEND);
 }
 
-// 暗角，让中心更亮，边缘更深
+// ============================
+// 3. Main polygon layers
+// ============================
+function drawMainPolygons() {
+  blendMode(SCREEN);
+  noStroke();
+
+  fill(0, 220, 215, 95);
+  polygon([
+    [40, 160], [210, 70], [360, 250], [120, 320]
+  ]);
+
+  fill(20, 210, 220, 70);
+  polygon([
+    [220, 0], [565, 0], [460, 310], [260, 250]
+  ]);
+
+  fill(255, 160, 65, 95);
+  polygon([
+    [245, 210], [545, 235], [520, 400], [270, 355]
+  ]);
+
+  fill(255, 60, 60, 110);
+  polygon([
+    [340, 350], [565, 300], [520, 610], [270, 555]
+  ]);
+
+  fill(230, 235, 255, 95);
+  polygon([
+    [520, 260], [720, 330], [630, 530]
+  ]);
+
+  fill(255, 230, 120, 90);
+  polygon([
+    [650, 245], [925, 180], [880, 435], [700, 410]
+  ]);
+
+  fill(255, 110, 80, 80);
+  polygon([
+    [750, 300], [1024, 330], [1010, 620], [820, 515]
+  ]);
+
+  fill(210, 225, 255, 105);
+  polygon([
+    [640, 545], [860, 480], [780, 745], [600, 710]
+  ]);
+
+  fill(255, 135, 60, 90);
+  polygon([
+    [250, 620], [470, 620], [510, 800], [220, 760]
+  ]);
+
+  fill(0, 185, 165, 95);
+  polygon([
+    [600, 660], [760, 790], [575, 945], [480, 780]
+  ]);
+
+  fill(248, 70, 65, 82);
+  polygon([
+    [700, 760], [940, 710], [1024, 1024], [770, 1024]
+  ]);
+
+  fill(0, 140, 155, 80);
+  polygon([
+    [40, 725], [230, 680], [190, 1024], [0, 1024]
+  ]);
+
+  fill(255, 235, 160, 75);
+  polygon([
+    [55, 330], [300, 350], [210, 470], [0, 420]
+  ]);
+
+  fill(150, 225, 255, 75);
+  polygon([
+    [120, 350], [360, 410], [250, 610], [0, 560]
+  ]);
+
+  fill(255, 95, 65, 75);
+  polygon([
+    [390, 420], [690, 410], [650, 620], [430, 610]
+  ]);
+
+  fill(90, 210, 220, 65);
+  polygon([
+    [755, 75], [1024, 120], [930, 300], [720, 250]
+  ]);
+
+  fill(255, 225, 110, 65);
+  polygon([
+    [555, 710], [785, 650], [700, 900], [510, 845]
+  ]);
+
+  blendMode(BLEND);
+}
+
+// ============================
+// 4. Light beams
+// ============================
+function drawLightBeams() {
+  blendMode(SCREEN);
+  noStroke();
+
+  beam(62, 346, 250, 300, 310, 380, 255, 180, 35, 135);
+  beam(62, 346, 250, 315, 300, 420, 255, 240, 150, 80);
+
+  beam(170, 392, 20, 346, 300, 350, 220, 235, 255, 120);
+  beam(170, 392, 52, 230, 200, 545, 190, 225, 255, 85);
+
+  beam(480, 342, 380, 560, 580, 525, 255, 220, 110, 110);
+  beam(480, 342, 515, 140, 430, 520, 255, 205, 75, 95);
+
+  beam(650, 285, 760, 350, 820, 420, 255, 210, 95, 105);
+  beam(650, 285, 760, 220, 830, 275, 210, 230, 255, 95);
+
+  beam(850, 310, 990, 250, 945, 380, 255, 230, 110, 125);
+  beam(850, 310, 955, 530, 790, 470, 255, 185, 95, 85);
+
+  beam(620, 660, 740, 775, 590, 820, 250, 225, 95, 110);
+  beam(805, 632, 915, 860, 780, 760, 160, 230, 255, 95);
+
+  beam(110, 800, 310, 740, 260, 900, 255, 170, 55, 95);
+  beam(390, 865, 560, 845, 455, 1010, 35, 200, 160, 110);
+
+  beam(720, 780, 600, 1024, 820, 1024, 255, 90, 65, 80);
+  beam(135, 80, 370, 60, 315, 120, 0, 220, 220, 75);
+  beam(745, 65, 930, 20, 865, 170, 255, 230, 115, 70);
+
+  blendMode(BLEND);
+}
+
+// ============================
+// 5. Dark circular nodes
+// ============================
+function drawDarkCircularNodes() {
+  blendMode(BLEND);
+
+  darkNode(58, 106, 46);
+  darkNode(472, 38, 43);
+  darkNode(472, 345, 62);
+  darkNode(670, 277, 62);
+  darkNode(915, 140, 105);
+  darkNode(1004, 328, 44);
+  darkNode(836, 632, 50);
+  darkNode(164, 928, 70);
+  darkNode(555, 507, 36);
+  darkNode(785, 792, 25);
+  darkNode(315, 765, 42);
+  darkNode(895, 780, 35);
+  darkNode(355, 735, 28);
+  darkNode(980, 225, 38);
+  darkNode(150, 630, 35);
+}
+
+// ============================
+// 6. Bright circles
+// ============================
+function drawBrightCircles() {
+  blendMode(SCREEN);
+  noStroke();
+
+  circleLayer(398, 505, 110, 255, 55, 55, 185);
+  circleLayer(616, 163, 82, 225, 230, 255, 185);
+  circleLayer(300, 251, 120, 255, 220, 95, 145);
+  circleLayer(58, 346, 84, 255, 180, 40, 145);
+  circleLayer(670, 665, 50, 250, 245, 195, 150);
+  circleLayer(530, 899, 78, 145, 230, 200, 120);
+  circleLayer(355, 890, 45, 205, 240, 255, 145);
+
+  circleLayer(635, 610, 45, 0, 205, 195, 130);
+  circleLayer(858, 740, 52, 0, 195, 190, 110);
+  circleLayer(136, 618, 80, 160, 230, 205, 105);
+  circleLayer(95, 450, 55, 30, 200, 200, 95);
+
+  circleLayer(760, 355, 95, 255, 220, 145, 95);
+  circleLayer(720, 110, 110, 245, 230, 120, 80);
+  circleLayer(870, 95, 120, 255, 240, 150, 75);
+
+  blendMode(BLEND);
+}
+
+// ============================
+// 7. Fine lines
+// ============================
+function drawFineLines() {
+  blendMode(SCREEN);
+
+  glowLine(65, 345, 230, 360, 255, 238, 165, 160, 5);
+  glowLine(90, 800, 260, 720, 255, 164, 53, 150, 4);
+  glowLine(456, 345, 540, 310, 255, 223, 95, 130, 5);
+  glowLine(530, 890, 510, 770, 255, 78, 69, 130, 5);
+  glowLine(625, 280, 745, 355, 255, 235, 145, 120, 5);
+  glowLine(800, 635, 855, 780, 190, 230, 255, 135, 5);
+  glowLine(850, 310, 980, 260, 248, 223, 96, 130, 5);
+  glowLine(170, 390, 265, 195, 180, 225, 255, 110, 6);
+
+  glowLine(520, 38, 590, 15, 255, 86, 60, 90, 2);
+  glowLine(815, 140, 760, 300, 255, 83, 62, 90, 2);
+  glowLine(425, 720, 552, 702, 255, 214, 80, 120, 4);
+  glowLine(645, 750, 700, 900, 255, 245, 140, 110, 3);
+  glowLine(230, 825, 325, 730, 255, 108, 64, 120, 3);
+
+  glowLine(30, 90, 200, 10, 0, 200, 210, 80, 4);
+  glowLine(720, 900, 875, 1010, 255, 80, 70, 80, 3);
+  glowLine(910, 655, 1024, 600, 0, 190, 210, 90, 3);
+  glowLine(120, 500, 20, 620, 180, 230, 255, 80, 3);
+
+  blendMode(BLEND);
+}
+
+// ============================
+// 8. Small details
+// ============================
+function drawSmallDetails() {
+  blendMode(SCREEN);
+  noStroke();
+
+  circleLayer(165, 200, 17, 0, 180, 205, 120);
+  circleLayer(545, 284, 12, 250, 245, 210, 140);
+  circleLayer(180, 880, 18, 255, 190, 98, 120);
+  circleLayer(865, 856, 30, 195, 230, 255, 135);
+  circleLayer(132, 631, 21, 225, 245, 255, 95);
+  circleLayer(32, 450, 12, 145, 210, 80, 85);
+  circleLayer(537, 582, 12, 225, 230, 255, 120);
+  circleLayer(735, 98, 14, 0, 125, 135, 120);
+  circleLayer(735, 960, 28, 0, 210, 183, 110);
+
+  circleLayer(980, 410, 16, 255, 65, 60, 120);
+  circleLayer(420, 760, 20, 255, 220, 100, 100);
+  circleLayer(620, 830, 18, 255, 230, 160, 100);
+  circleLayer(80, 940, 16, 255, 180, 55, 90);
+  circleLayer(250, 145, 18, 230, 240, 255, 100);
+
+  blendMode(BLEND);
+}
+
+// ============================
+// 9. Vignette
+// ============================
 function drawVignette() {
-  push();
+  blendMode(MULTIPLY);
   noFill();
 
-  // 只压暗边缘，不压暗中心
-  for (let i = 0; i < 120; i++) {
-    let alphaValue = map(i, 0, 120, 0, 8);
-    stroke(0, 15, 20, alphaValue);
-    strokeWeight(8);
-    rect(i, i, width - i * 2, height - i * 2);
+  for (let r = 600; r < 1250; r += 45) {
+    stroke(0, 30, 35, 13);
+    strokeWeight(48);
+    ellipse(512, 512, r, r);
   }
 
-  pop();
+  blendMode(BLEND);
+}
+
+// ============================
+// Helper functions
+// ============================
+function polygon(points) {
+  beginShape();
+  for (let i = 0; i < points.length; i++) {
+    vertex(points[i][0], points[i][1]);
+  }
+  endShape(CLOSE);
+}
+
+function circleLayer(x, y, d, r, g, b, a) {
+  fill(r, g, b, a);
+  ellipse(x, y, d, d);
+}
+
+function beam(x1, y1, x2, y2, x3, y3, r, g, b, a) {
+  fill(r, g, b, a);
+  triangle(x1, y1, x2, y2, x3, y3);
+}
+
+function darkNode(x, y, d) {
+  noStroke();
+
+  fill(0, 42, 46, 170);
+  ellipse(x, y, d, d);
+
+  fill(0, 20, 25, 110);
+  ellipse(x, y, d * 0.55, d * 0.55);
+
+  fill(255, 255, 255, 18);
+  ellipse(x - d * 0.18, y - d * 0.18, d * 0.18, d * 0.18);
+}
+
+function glowLine(x1, y1, x2, y2, r, g, b, a, w) {
+  stroke(r, g, b, a);
+  strokeWeight(w);
+  line(x1, y1, x2, y2);
 }
