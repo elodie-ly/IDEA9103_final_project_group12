@@ -1,6 +1,7 @@
 let scene;
 let grainLayer;
 
+// Creates the full-browser canvas and initialises the visual scene.
 function setup() {
   const canvas = createCanvas(windowWidth, windowHeight);
 
@@ -26,11 +27,13 @@ function setup() {
   }
 }
 
+// Keeps the artwork responsive when the browser window changes size.
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
   buildGrain();
 }
 
+// Main animation loop: reads the current time phase, then draws each visual layer.
 function draw() {
   const phase = getPhase();
   const seconds = millis() / 1000;
@@ -51,6 +54,7 @@ function draw() {
   drawPhaseMeter(phase);
 }
 
+// Builds the reusable scene data. Seeded randomness keeps the composition stable each reload.
 function buildScene() {
   randomSeed(43690);
   noiseSeed(724551);
@@ -183,6 +187,7 @@ function buildScene() {
   }
 }
 
+// Creates a small procedural noise texture that is stretched over the canvas for a print-like surface.
 function buildGrain() {
   grainLayer = createGraphics(420, 420);
   grainLayer.pixelDensity(1);
@@ -197,6 +202,7 @@ function buildGrain() {
   grainLayer.updatePixels();
 }
 
+// Generates irregular polygon points for CUDA-like shard shapes.
 function makeShardVerts() {
   const sides = floor(random(3, 6));
   const verts = [];
@@ -209,6 +215,7 @@ function makeShardVerts() {
   return verts;
 }
 
+// Draws the phase-dependent gradient background and large colour glows.
 function drawGradientBackground(phase) {
   blendMode(BLEND);
   const g = drawingContext.createLinearGradient(0, 0, width, height);
@@ -229,6 +236,7 @@ function drawGradientBackground(phase) {
   drawSoftGlow(width * 0.72, height * 0.63, unit() * 0.48, [190, 66, 82], 12);
 }
 
+// Draws soft translucent oval washes that create depth behind the geometry.
 function drawBaseWashes(phase, seconds) {
   blendMode(BLEND);
   noStroke();
@@ -246,6 +254,7 @@ function drawBaseWashes(phase, seconds) {
   }
 }
 
+// Draws layered circles and arc wedges; their size and spin are influenced by the current time phase.
 function drawCircles(phase, seconds) {
   blendMode(BLEND);
   noStroke();
@@ -284,6 +293,7 @@ function drawCircles(phase, seconds) {
   }
 }
 
+// Draws angular polygon shards that rotate faster during the Energy Burst phase.
 function drawShards(phase, seconds) {
   blendMode(BLEND);
   noStroke();
@@ -307,6 +317,7 @@ function drawShards(phase, seconds) {
   }
 }
 
+// Draws thin rectangular bars inspired by the linear fragments in the reference images.
 function drawBars(phase, seconds) {
   blendMode(BLEND);
   noStroke();
@@ -327,6 +338,7 @@ function drawBars(phase, seconds) {
   }
 }
 
+// Draws bright ray lines; the Energy Burst phase uses ADD blend mode for stronger light.
 function drawRays(phase, seconds) {
   const intensity = phase.index === 2 ? 2.9 : phase.index === 3 ? 0.45 : 1;
   blendMode(phase.index === 2 ? ADD : BLEND);
@@ -344,6 +356,7 @@ function drawRays(phase, seconds) {
   blendMode(BLEND);
 }
 
+// Draws small glowing node points and short connecting lines.
 function drawNodes(phase, seconds) {
   const lineAlpha = phase.index === 2 ? 42 : phase.index === 3 ? 13 : 24;
   blendMode(BLEND);
@@ -364,6 +377,7 @@ function drawNodes(phase, seconds) {
   }
 }
 
+// Overlays the grain texture to reduce flatness and make the digital image feel more tactile.
 function drawGrain(phase) {
   blendMode(phase.index === 3 ? SCREEN : OVERLAY);
   tint(0, 0, 100, phase.index === 3 ? 9 : 15);
@@ -372,6 +386,7 @@ function drawGrain(phase) {
   blendMode(BLEND);
 }
 
+// Helper function for drawing layered translucent ellipses as soft glows.
 function drawSoftGlow(x, y, radius, c, alpha) {
   noStroke();
   for (let i = 5; i >= 1; i--) {
