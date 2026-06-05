@@ -1,7 +1,9 @@
+// Duration of each visual stage in milliseconds.
 const PHASE_DURATION = 10000;
 const CYCLE_DURATION = PHASE_DURATION * 4;
 const TWO_PI_F = Math.PI * 2;
 
+// Four planned phases. Each phase has a label, time range, gradient colours, and meter colour.
 const PHASES = [
   {
     name: "Warm Build-up",
@@ -29,6 +31,7 @@ const PHASES = [
   },
 ];
 
+// HSB palettes used by different time phases and visual layers.
 const PALETTES = {
   base: [
     [187, 78, 62],
@@ -71,12 +74,14 @@ const PALETTES = {
   ],
 };
 
+// Animated event arrays managed by the time-based mechanic.
 let particles = [];
 let pulses = [];
 let flashes = [];
 let lastPhase = -1;
 let eventClock;
 
+// Calculates which timed phase is currently active based on millis().
 function getPhase() {
   const cycleTime = millis() % CYCLE_DURATION;
   const index = floor(cycleTime / PHASE_DURATION);
@@ -90,6 +95,7 @@ function getPhase() {
   };
 }
 
+// Triggers scheduled events at different intervals depending on the active phase.
 function runTimedEvents(phase) {
   const now = millis();
   if (phase.index !== lastPhase) {
@@ -129,6 +135,7 @@ function runTimedEvents(phase) {
   }
 }
 
+// Fires one-off events exactly when a new phase begins.
 function handlePhaseStart(index) {
   if (index === 0) {
     pulses.push(makePulse(width * 0.38, height * 0.5, unit() * 0.54, PALETTES.warm[1], 4.2, 21));
@@ -144,6 +151,7 @@ function handlePhaseStart(index) {
   }
 }
 
+// Creates an expanding ring event used for timed visual emphasis.
 function makePulse(x, y, radius, c, duration, alpha) {
   return {
     x,
@@ -156,6 +164,7 @@ function makePulse(x, y, radius, c, duration, alpha) {
   };
 }
 
+// Updates and draws expanding timed pulse rings.
 function drawPulses(dt) {
   blendMode(SCREEN);
   for (let i = pulses.length - 1; i >= 0; i--) {
@@ -178,6 +187,7 @@ function drawPulses(dt) {
   blendMode(BLEND);
 }
 
+// Creates many particles from one point during Energy Burst events.
 function spawnParticleBurst(x, y, count, force) {
   for (let i = 0; i < count; i++) {
     const a = random(TWO_PI_F);
@@ -202,6 +212,7 @@ function spawnParticleBurst(x, y, count, force) {
   }
 }
 
+// Updates and draws particles with drag and fading lifetime.
 function drawParticles(dt, phase) {
   const drag = phase.index === 2 ? 0.982 : 0.968;
   blendMode(ADD);
@@ -229,6 +240,7 @@ function drawParticles(dt, phase) {
   blendMode(BLEND);
 }
 
+// Creates a short bright line flash event.
 function makeFlash(x, y, c) {
   const angle = random(TWO_PI_F);
   const len = random(unit() * 0.09, unit() * 0.32);
@@ -244,6 +256,7 @@ function makeFlash(x, y, c) {
   };
 }
 
+// Updates and draws flash events, then removes them when finished.
 function drawFlashes(dt) {
   blendMode(ADD);
   for (let i = flashes.length - 1; i >= 0; i--) {
@@ -265,6 +278,7 @@ function drawFlashes(dt) {
   blendMode(BLEND);
 }
 
+// Draws the bottom timeline meter so viewers can see the current phase.
 function drawPhaseMeter(phase) {
   const margin = clamp(unit() * 0.022, 16, 26);
   const meterWidth = min(width - margin * 2, 470);
@@ -290,6 +304,7 @@ function drawPhaseMeter(phase) {
   text(`${phase.info.name}  ${phase.info.range}`, x, y - 10);
 }
 
+// Returns phase-specific opacity multipliers for each visual layer.
 function phaseLayerAlpha(phase, layer) {
   const p = phase.progress;
   if (phase.index === 0) {
@@ -312,19 +327,22 @@ function phaseLayerAlpha(phase, layer) {
   return fade;
 }
 
-
+// Responsive measurement based on the smaller side of the screen.
 function unit() {
   return min(width, height);
 }
 
+// Chooses a random item from an array.
 function pick(list) {
   return list[floor(random(list.length))];
 }
 
+// Rotates a hue value while keeping it in the 0-360 range.
 function shiftHue(h, delta) {
   return (h + delta + 360) % 360;
 }
 
+// Keeps a value inside a safe minimum and maximum range.
 function clamp(value, minValue, maxValue) {
   return Math.max(minValue, Math.min(maxValue, value));
 }
