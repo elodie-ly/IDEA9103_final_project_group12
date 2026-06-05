@@ -107,6 +107,21 @@ The time-based mechanic will act as the main visual director of our CUDA-inspire
              Repeat
 
 ```
+### Time-Based Technical Implementation
+
+The mechanic uses:
+
+- `millis()` to track elapsed time.
+- `PHASE_DURATION` and `CYCLE_DURATION` to create a 40-second loop.
+- `getPhase()` to calculate the current phase and progress.
+- `runTimedEvents()` to trigger repeated events during each phase.
+- `handlePhaseStart()` to trigger one-off visual events when a new phase begins.
+- Timed pulse, flash, and particle burst systems.
+- `phaseLayerAlpha()` to control opacity for different visual layers in different phases.
+- `drawPhaseMeter()` to display the current time phase at the bottom of the screen.
+
+
+
 ---
 
 
@@ -138,3 +153,83 @@ By adding mouse and keyboard interaction, the artwork becomes more playful and i
 All four mechanics will share one canvas as layered systems. The Perlin noise mechanic creates a flowing background field, the time-based mechanic changes colour phases and triggers events, the audio mechanic makes circles and particles pulse with sound, and the user input mechanic lets the audience disturb or reshape the composition. They influence each other through shared colours, transparency, and repeated geometric forms. Visually, the project is held together by the *CUDA*-inspired style: overlapping circles, rectangles, lines, warm/cool contrast, and dense abstract movement.
 
 ---
+
+# Part 4: p5.js Techniques
+
+## 1. Modular Code Structure
+
+```text
+project-folder/
+├── index.html
+├── style.css
+├── sketch.js
+├── time-mechanic.js
+├── audio-mechanic.js
+├── perlin-mechanic.js
+├── user-input-mechanic.js
+├── assets/
+└── libraries/
+    ├── p5.min.js
+    └── p5.sound.min.js
+```
+
+
+
+
+
+\\\\
+For the current time-based prototype:
+
+- `sketch.js` builds and draws the visual system, including background washes, circles, shards, bars, rays, nodes, glow, and grain texture.
+- `time-mechanic.js` controls the timing system, phase transitions, pulses, flashes, particle bursts, opacity changes, and phase meter.
+
+## 2. `setup()` and `draw()`
+
+The project uses the standard p5.js structure. `setup()` creates the full-window canvas, sets colour and angle modes, and builds the base visual scene. `draw()` runs continuously and redraws the artwork according to the current time phase.
+
+## 3. `millis()` Timing
+
+The time-based mechanic uses `millis()` to measure elapsed time and calculate the current phase. This allows the artwork to change automatically without user input.
+
+## 4. Arrays and Loops
+
+Arrays store many visual elements, including washes, circles, shards, bars, rays, nodes, pulses, flashes, and particles. Loops are used to update and draw these elements efficiently.
+
+## 5. Seeded Randomness
+
+`randomSeed()` and `noiseSeed()` are used to make the composition feel generative while keeping the overall structure stable. This helps the artwork look designed rather than completely uncontrolled.
+
+## 6. Blend Modes and Transparency
+
+The project uses blend modes such as `BLEND`, `SCREEN`, `ADD`, and `OVERLAY`, together with transparent colours, to create a luminous layered effect inspired by *CUDA*.
+
+## 7. Responsive Canvas
+
+The canvas uses `windowWidth`, `windowHeight`, and `windowResized()` so the artwork scales correctly when the browser window changes size. The helper function `unit()` uses the smaller side of the screen to keep proportions consistent.
+\\\\
+
+---
+
+# Part 5: Interaction Instructions
+Open `index.html` in a browser.
+For the time-based version:
+1. **0–10 seconds:** Warm build-up begins with expanding warm circular forms.
+2. **10–20 seconds:** Cool drift shifts the atmosphere toward blue, cyan, and green.
+3. **20–30 seconds:** Energy burst triggers faster motion, bright rays, flashes, and particles.
+4. **30–40 seconds:** Dark reset slows movement and fades the canvas.
+5. The cycle repeats every 40 seconds.
+
+
+# Part 6: AI Acknowledgement
+Optimised code comments and drafted a README document. This helped clarify the purpose of the functions, explained how p5.js’s timing logic works, and improved the structure of the project documentation.
+
+
+---
+
+# Part 7: External References
+
+- Gamboa Naon, M. (n.d.). *CUDA*. Behance. https://www.behance.net/gallery/66472289/CUDA
+- p5.js Contributors. (n.d.). *p5.js reference*. https://p5js.org/reference/
+- p5.js Contributors. (n.d.). *p5.sound library*. https://p5js.org/reference/#/libraries/p5.sound
+
+The visual direction is inspired by *CUDA*, especially its layered translucent geometry, intense colour contrast, and generative abstract composition.
