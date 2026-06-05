@@ -1,440 +1,382 @@
-let timeMechanic;
-let shapes = [];
-let particles = [];
-let glowFields = [];
+let scene;
+let grainLayer;
 
 function setup() {
-  createCanvas(windowWidth, windowHeight);
+  const canvas = createCanvas(windowWidth, windowHeight);
+
+  // If index.html contains <main id="artwork"></main>, attach canvas to it.
+  // If not, p5 will still place the canvas in the body.
+  const artworkContainer = select("#artwork");
+  if (artworkContainer) {
+    canvas.parent("artwork");
+  }
+
+  pixelDensity(Math.min(window.devicePixelRatio || 1, 2));
+  colorMode(HSB, 360, 100, 100, 100);
   angleMode(RADIANS);
+  rectMode(CENTER);
   noStroke();
 
-  randomSeed(18);
+  buildScene();
+  buildGrain();
 
-  timeMechanic = new TimeMechanic();
-
-  // Base layered composition, similar to the reference image
-  for (let i = 0; i < 120; i++) {
-    shapes.push(new AbstractShape(floor(random(4)), true));
+  const loading = select("#loading");
+  if (loading) {
+    loading.addClass("hidden");
   }
-
-  // Soft glowing fields behind the geometry
-  for (let i = 0; i < 35; i++) {
-    glowFields.push(new GlowField());
-  }
-}
-
-function draw() {
-  timeMechanic.update();
-  let settings = timeMechanic.getPhaseSettings();
-
-  drawDeepBackground(settings);
-
-  // Soft luminous background layer
-  for (let glow of glowFields) {
-    glow.update(settings);
-    glow.display(settings);
-  }
-
-  // Time-based mechanic controls spawning and burst events
-  timeMechanic.runTimedEvents(shapes, particles);
-
-  // Main geometry layer
-  for (let i = shapes.length - 1; i >= 0; i--) {
-    shapes[i].update(settings);
-    shapes[i].display(settings);
-
-    if (shapes[i].isDead()) {
-      shapes.splice(i, 1);
-    }
-  }
-
-  // Particle burst layer
-  for (let i = particles.length - 1; i >= 0; i--) {
-    particles[i].update();
-    particles[i].display();
-
-    if (particles[i].isDead()) {
-      particles.splice(i, 1);
-    }
-  }
-
-  // Keep performance stable
-  while (shapes.length > 220) {
-    shapes.shift();
-  }
-
-  drawCentralMist(settings);
-  drawVignette();
-
-  timeMechanic.displayDebugText();
-}
-
-function drawDeepBackground(settings) {
-  let fadeAmount = settings.backgroundFade;
-
-  if (settings.colourMode === "warm") {
-    background(8, 32, 38, fadeAmount);
-  } else if (settings.colourMode === "cool") {
-    background(5, 34, 50, fadeAmount);
-  } else if (settings.colourMode === "burst") {
-    background(10, 24, 36, fadeAmount);
-  } else {
-    background(3, 16, 25, fadeAmount);
-  }
-
-  push();
-  blendMode(SCREEN);
-  noStroke();
-
-  fill(0, 110, 130, 18);
-  ellipse(width * 0.25, height * 0.25, width * 0.7, height * 0.65);
-
-  fill(20, 120, 160, 16);
-  ellipse(width * 0.78, height * 0.5, width * 0.7, height * 0.75);
-
-  fill(255, 170, 65, 10);
-  ellipse(width * 0.52, height * 0.42, width * 0.45, height * 0.45);
-
-  pop();
-}
-
-function drawCentralMist(settings) {
-  push();
-  blendMode(SCREEN);
-  noStroke();
-
-  let mistAlpha = 10;
-
-  if (settings.colourMode === "burst") {
-    mistAlpha = 26;
-  } else if (settings.colourMode === "dark") {
-    mistAlpha = 6;
-  }
-
-  fill(220, 235, 255, mistAlpha);
-  ellipse(width * 0.5, height * 0.5, width * 0.55, height * 0.48);
-
-  fill(255, 210, 150, mistAlpha * 0.55);
-  ellipse(width * 0.42, height * 0.46, width * 0.35, height * 0.32);
-
-  pop();
-}
-
-function drawVignette() {
-  push();
-  noFill();
-
-  for (let i = 0; i < 18; i++) {
-    stroke(0, 10);
-    strokeWeight(i * 8);
-    rect(i * 4, i * 4, width - i * 8, height - i * 8);
-  }
-
-  pop();
 }
 
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
+  buildGrain();
 }
 
-// ------------------------------------------------------------
-// Shape system
-// ------------------------------------------------------------
+function draw() {
+  const phase = getPhase();
+  const seconds = millis() / 1000;
+  const dt = Math.min(deltaTime || 16.67, 40) / 1000;
 
-class AbstractShape {
-  constructor(phaseIndex, baseLayer = false) {
-    this.phaseIndex = phaseIndex;
-    this.baseLayer = baseLayer;
+  runTimedEvents(phase);
+  drawGradientBackground(phase);
+  drawBaseWashes(phase, seconds);
+  drawCircles(phase, seconds);
+  drawShards(phase, seconds);
+  drawBars(phase, seconds);
+  drawRays(phase, seconds);
+  drawNodes(phase, seconds);
+  drawPulses(dt);
+  drawFlashes(dt);
+  drawParticles(dt, phase);
+  drawGrain(phase);
+  drawPhaseMeter(phase);
+}
 
-    this.x = random(width);
-    this.y = random(height);
+function buildScene() {
+  randomSeed(43690);
+  noiseSeed(724551);
+  scene = {
+    washes: [],
+    circles: [],
+    shards: [],
+    bars: [],
+    rays: [],
+    nodes: [],
+  };
+  eventClock = {
+    warm: -9999,
+    cool: -9999,
+    burst: -9999,
+    dark: -9999,
+  };
 
-    this.size = baseLayer ? random(90, 420) : random(45, 260);
-    this.rotation = random(TWO_PI);
-    this.rotationSpeed = random(-0.006, 0.006);
-
-    this.vx = random(-0.18, 0.18);
-    this.vy = random(-0.18, 0.18);
-
-    this.life = 0;
-    this.lifeMax = baseLayer ? random(28000, 52000) : random(8000, 22000);
-
-    this.type = random(["circle", "arc", "arc", "triangle", "beam", "quad", "thinLine"]);
-
-    this.colour = this.pickColour(phaseIndex);
-    this.baseAlpha = baseLayer ? random(18, 55) : random(35, 95);
-
-    this.arcStart = random(TWO_PI);
-    this.arcEnd = this.arcStart + random(PI / 5, PI * 1.6);
-
-    this.innerRatio = random(0.25, 0.75);
+  for (let i = 0; i < 42; i++) {
+    scene.washes.push({
+      x: random(-0.15, 1.15),
+      y: random(-0.12, 1.12),
+      r: random(0.22, 0.72),
+      c: pick(PALETTES.base),
+      a: random(4, 13),
+      seed: random(1000),
+      drift: random(0.004, 0.018),
+      oval: random(0.65, 1.45),
+    });
   }
 
-  pickColour(phaseIndex) {
-    let warmPalette = [
-      color(229, 81, 65),
-      color(242, 132, 62),
-      color(245, 188, 72),
-      color(255, 215, 120),
-      color(40, 145, 140)
-    ];
+  const anchorCircles = [
+    [0.12, 0.78, 0.27, [198, 86, 52], 23],
+    [0.74, 0.23, 0.17, [214, 32, 98], 31],
+    [0.79, 0.79, 0.23, [197, 82, 64], 25],
+    [0.40, 0.56, 0.19, [6, 78, 95], 24],
+    [0.63, 0.36, 0.22, [37, 82, 100], 22],
+    [0.88, 0.38, 0.28, [154, 62, 70], 19],
+    [0.19, 0.25, 0.21, [184, 82, 60], 22],
+    [0.47, 0.87, 0.16, [43, 74, 100], 20],
+  ];
 
-    let coolPalette = [
-      color(20, 105, 135),
-      color(30, 150, 180),
-      color(25, 90, 130),
-      color(45, 145, 125),
-      color(170, 220, 235)
-    ];
-
-    let burstPalette = [
-      color(255, 220, 115),
-      color(255, 245, 220),
-      color(255, 85, 75),
-      color(255, 145, 55),
-      color(120, 220, 255)
-    ];
-
-    let darkPalette = [
-      color(5, 45, 60),
-      color(8, 65, 80),
-      color(18, 75, 85),
-      color(30, 45, 70),
-      color(70, 55, 95)
-    ];
-
-    if (phaseIndex === 0) return random(warmPalette);
-    if (phaseIndex === 1) return random(coolPalette);
-    if (phaseIndex === 2) return random(burstPalette);
-    return random(darkPalette);
+  for (const item of anchorCircles) {
+    scene.circles.push({
+      x: item[0],
+      y: item[1],
+      r: item[2],
+      c: item[3],
+      a: item[4],
+      spin: random(-0.8, 0.8),
+      start: random(TWO_PI_F),
+      span: random(0.35, 1.25),
+      wedge: true,
+      warmBias: item[3][0] < 60 || item[3][0] > 330,
+      seed: random(1000),
+    });
   }
 
-  update(settings) {
-    this.life += deltaTime;
-
-    this.rotation += this.rotationSpeed * settings.speed;
-
-    this.x += this.vx * settings.speed;
-    this.y += this.vy * settings.speed;
-
-    if (this.x < -this.size) this.x = width + this.size;
-    if (this.x > width + this.size) this.x = -this.size;
-    if (this.y < -this.size) this.y = height + this.size;
-    if (this.y > height + this.size) this.y = -this.size;
-
-    if (settings.colourMode === "warm") {
-      this.size += sin(frameCount * 0.01 + this.x * 0.01) * 0.18;
-    }
-
-    if (settings.colourMode === "burst") {
-      this.size += sin(frameCount * 0.05 + this.y * 0.01) * 0.75;
-      this.rotation += this.rotationSpeed * 2.5;
-    }
-
-    if (settings.colourMode === "dark") {
-      this.baseAlpha *= 0.9988;
-    }
+  for (let i = 0; i < 76; i++) {
+    const palette = random() < 0.42 ? PALETTES.cool : PALETTES.base;
+    const c = pick(palette);
+    scene.circles.push({
+      x: random(-0.08, 1.08),
+      y: random(-0.08, 1.08),
+      r: random() < 0.22 ? random(0.11, 0.24) : random(0.018, 0.105),
+      c,
+      a: random(8, 28),
+      spin: random(-1.1, 1.1),
+      start: random(TWO_PI_F),
+      span: random(0.2, 1.55),
+      wedge: random() < 0.62,
+      warmBias: c[0] < 62 || c[0] > 330,
+      seed: random(1000),
+    });
   }
 
-  display(settings) {
+  for (let i = 0; i < 72; i++) {
+    scene.shards.push({
+      x: random(-0.1, 1.1),
+      y: random(-0.1, 1.1),
+      r: random(0.035, 0.23),
+      c: pick(random() < 0.34 ? PALETTES.warm : PALETTES.base),
+      a: random(7, 23),
+      rot: random(TWO_PI_F),
+      spin: random(-0.38, 0.38),
+      seed: random(1000),
+      verts: makeShardVerts(),
+    });
+  }
+
+  for (let i = 0; i < 56; i++) {
+    const long = random() < 0.72;
+    scene.bars.push({
+      x: random(-0.1, 1.1),
+      y: random(-0.1, 1.1),
+      w: long ? random(0.08, 0.36) : random(0.025, 0.09),
+      h: long ? random(0.006, 0.025) : random(0.025, 0.12),
+      c: pick(random() < 0.66 ? PALETTES.cool : PALETTES.warm),
+      a: random(10, 31),
+      rot: random(TWO_PI_F),
+      drift: random(0.006, 0.025),
+      seed: random(1000),
+    });
+  }
+
+  for (let i = 0; i < 46; i++) {
+    scene.rays.push({
+      x: random(-0.08, 1.08),
+      y: random(-0.08, 1.08),
+      len: random(0.08, 0.35),
+      c: pick(random() < 0.52 ? PALETTES.burst : PALETTES.cool),
+      a: random(18, 50),
+      rot: random(TWO_PI_F),
+      seed: random(1000),
+      weight: random(0.8, 2.6),
+    });
+  }
+
+  for (let i = 0; i < 64; i++) {
+    scene.nodes.push({
+      x: random(-0.04, 1.04),
+      y: random(-0.04, 1.04),
+      r: random(0.004, 0.014),
+      c: pick(random() < 0.55 ? PALETTES.cool : PALETTES.warm),
+      a: random(28, 70),
+      rot: random(TWO_PI_F),
+      len: random(0.035, 0.16),
+      seed: random(1000),
+    });
+  }
+}
+
+function buildGrain() {
+  grainLayer = createGraphics(420, 420);
+  grainLayer.pixelDensity(1);
+  grainLayer.loadPixels();
+  for (let i = 0; i < grainLayer.pixels.length; i += 4) {
+    const shade = random() < 0.52 ? 255 : 0;
+    grainLayer.pixels[i] = shade;
+    grainLayer.pixels[i + 1] = shade;
+    grainLayer.pixels[i + 2] = shade;
+    grainLayer.pixels[i + 3] = random(4, 18);
+  }
+  grainLayer.updatePixels();
+}
+
+function makeShardVerts() {
+  const sides = floor(random(3, 6));
+  const verts = [];
+  let start = random(TWO_PI_F);
+  for (let i = 0; i < sides; i++) {
+    const a = start + (i / sides) * TWO_PI_F + random(-0.3, 0.3);
+    const r = random(0.35, 1);
+    verts.push([cos(a) * r, sin(a) * r]);
+  }
+  return verts;
+}
+
+function drawGradientBackground(phase) {
+  blendMode(BLEND);
+  const g = drawingContext.createLinearGradient(0, 0, width, height);
+  g.addColorStop(0, phase.info.bg[0]);
+  g.addColorStop(0.48, phase.info.bg[1]);
+  g.addColorStop(1, phase.info.bg[2]);
+  drawingContext.fillStyle = g;
+  drawingContext.fillRect(0, 0, width, height);
+
+  noStroke();
+  const darkAlpha = phase.index === 3 ? 38 + phase.progress * 28 : 9;
+  fill(210, 75, 8, darkAlpha);
+  rect(width / 2, height / 2, width * 1.08, height * 1.08);
+
+  const warmLift =
+    phase.index === 0 ? 20 + phase.progress * 28 : phase.index === 2 ? 26 : 10;
+  drawSoftGlow(width * 0.37, height * 0.47, unit() * 0.55, [30, 80, 100], warmLift);
+  drawSoftGlow(width * 0.72, height * 0.63, unit() * 0.48, [190, 66, 82], 12);
+}
+
+function drawBaseWashes(phase, seconds) {
+  blendMode(BLEND);
+  noStroke();
+  for (const s of scene.washes) {
+    const driftStrength = phase.index === 1 ? 2.4 : phase.index === 3 ? 0.5 : 1;
+    const dx = sin(seconds * 0.18 + s.seed) * unit() * s.drift * driftStrength;
+    const dy = cos(seconds * 0.16 + s.seed * 1.7) * unit() * s.drift * driftStrength;
+    const a = s.a * phaseLayerAlpha(phase, "wash");
+    fill(s.c[0], s.c[1], s.c[2], a);
     push();
-    blendMode(SCREEN);
-    translate(this.x, this.y);
-    rotate(this.rotation);
+    translate(s.x * width + dx, s.y * height + dy);
+    rotate(s.seed + seconds * 0.01);
+    ellipse(0, 0, s.r * unit() * s.oval, s.r * unit());
+    pop();
+  }
+}
 
-    let fade = map(this.life, 0, this.lifeMax, 1, 0);
-    fade = constrain(fade, 0, 1);
+function drawCircles(phase, seconds) {
+  blendMode(BLEND);
+  noStroke();
+  for (const c of scene.circles) {
+    const coolDrift = phase.index === 1 ? unit() * 0.025 : unit() * 0.006;
+    const dx = sin(seconds * 0.24 + c.seed) * coolDrift;
+    const dy = cos(seconds * 0.19 + c.seed * 1.3) * coolDrift;
+    let grow = 1;
+    if (phase.index === 0) {
+      grow = 1 + phase.progress * 0.32 + sin(seconds * 0.8 + c.seed) * 0.04;
+    } else if (phase.index === 2) {
+      grow = 1 + sin(phase.progress * Math.PI) * 0.16;
+    } else if (phase.index === 3) {
+      grow = 0.95 - phase.progress * 0.16;
+    }
 
-    let a = this.baseAlpha * fade * settings.opacity;
+    const warmBoost = phase.index === 0 && c.warmBias ? 1.75 : 1;
+    const a = c.a * phaseLayerAlpha(phase, "circle") * warmBoost;
+    const x = c.x * width + dx;
+    const y = c.y * height + dy;
+    const r = c.r * unit() * grow;
 
-    fill(red(this.colour), green(this.colour), blue(this.colour), a);
-    stroke(red(this.colour), green(this.colour), blue(this.colour), a * 0.35);
+    fill(c.c[0], c.c[1], c.c[2], a);
+    ellipse(x, y, r * 2, r * 2);
+
+    if (c.wedge) {
+      const burstSpin = phase.index === 2 ? 3.8 : phase.index === 3 ? 0.25 : 0.75;
+      const angle = c.start + seconds * c.spin * burstSpin;
+      fill(shiftHue(c.c[0], 18), max(20, c.c[1] - 8), min(100, c.c[2] + 8), a * 0.85);
+      arc(x, y, r * 2.05, r * 2.05, angle, angle + c.span, PIE);
+    }
+
+    if (phase.index === 2 && c.r < 0.08 && random() < 0.006) {
+      flashes.push(makeFlash(x, y, c.c));
+    }
+  }
+}
+
+function drawShards(phase, seconds) {
+  blendMode(BLEND);
+  noStroke();
+  for (const s of scene.shards) {
+    const energySpin = phase.index === 2 ? 2.2 : phase.index === 3 ? 0.25 : 0.7;
+    const drift = phase.index === 1 ? unit() * 0.024 : unit() * 0.009;
+    const x = s.x * width + sin(seconds * 0.2 + s.seed) * drift;
+    const y = s.y * height + cos(seconds * 0.17 + s.seed) * drift;
+    const r = s.r * unit() * (phase.index === 2 ? 1.08 : 1);
+    const a = s.a * phaseLayerAlpha(phase, "shard");
+    push();
+    translate(x, y);
+    rotate(s.rot + seconds * s.spin * energySpin);
+    fill(s.c[0], s.c[1], s.c[2], a);
+    beginShape();
+    for (const v of s.verts) {
+      vertex(v[0] * r, v[1] * r);
+    }
+    endShape(CLOSE);
+    pop();
+  }
+}
+
+function drawBars(phase, seconds) {
+  blendMode(BLEND);
+  noStroke();
+  for (const b of scene.bars) {
+    const softDrift = phase.index === 1 ? 3.4 : phase.index === 3 ? 0.45 : 1.1;
+    const energy = phase.index === 2 ? 1.7 : 1;
+    const x = b.x * width + sin(seconds * 0.32 + b.seed) * unit() * b.drift * softDrift;
+    const y = b.y * height + cos(seconds * 0.28 + b.seed * 1.5) * unit() * b.drift * softDrift;
+    const w = b.w * unit() * (phase.index === 2 ? 1.12 : 1);
+    const h = max(1.5, b.h * unit() * energy);
+    const a = b.a * phaseLayerAlpha(phase, "bar");
+    push();
+    translate(x, y);
+    rotate(b.rot + sin(seconds * 0.18 + b.seed) * 0.08);
+    fill(b.c[0], b.c[1], b.c[2], a);
+    rect(0, 0, w, h);
+    pop();
+  }
+}
+
+function drawRays(phase, seconds) {
+  const intensity = phase.index === 2 ? 2.9 : phase.index === 3 ? 0.45 : 1;
+  blendMode(phase.index === 2 ? ADD : BLEND);
+  for (const r of scene.rays) {
+    const spin = phase.index === 2 ? 2.6 : 0.38;
+    const angle = r.rot + seconds * 0.12 * spin + sin(seconds + r.seed) * 0.07;
+    const x = r.x * width;
+    const y = r.y * height;
+    const len = r.len * unit() * (phase.index === 2 ? 1.22 : 1);
+    stroke(r.c[0], r.c[1], r.c[2], r.a * phaseLayerAlpha(phase, "ray") * intensity);
+    strokeWeight(max(1, r.weight * (phase.index === 2 ? 1.4 : 1)));
+    line(x, y, x + cos(angle) * len, y + sin(angle) * len);
+  }
+  noStroke();
+  blendMode(BLEND);
+}
+
+function drawNodes(phase, seconds) {
+  const lineAlpha = phase.index === 2 ? 42 : phase.index === 3 ? 13 : 24;
+  blendMode(BLEND);
+  for (const n of scene.nodes) {
+    const drift = phase.index === 1 ? unit() * 0.018 : unit() * 0.005;
+    const x = n.x * width + sin(seconds * 0.3 + n.seed) * drift;
+    const y = n.y * height + cos(seconds * 0.22 + n.seed) * drift;
+    const a = n.rot + seconds * (phase.index === 2 ? 1.8 : 0.24);
+    stroke(n.c[0], n.c[1], n.c[2], lineAlpha * phaseLayerAlpha(phase, "node"));
     strokeWeight(1);
-
-    if (this.type === "circle") {
-      this.drawCircle(a);
-    } else if (this.type === "arc") {
-      this.drawArc(a);
-    } else if (this.type === "triangle") {
-      this.drawTriangle();
-    } else if (this.type === "beam") {
-      this.drawBeam();
-    } else if (this.type === "quad") {
-      this.drawQuad();
-    } else if (this.type === "thinLine") {
-      this.drawThinLine();
-    }
-
-    pop();
-  }
-
-  drawCircle(a) {
+    line(x, y, x + cos(a) * n.len * unit(), y + sin(a) * n.len * unit());
     noStroke();
-
-    fill(red(this.colour), green(this.colour), blue(this.colour), a);
-    ellipse(0, 0, this.size, this.size);
-
-    fill(255, 255, 255, a * 0.18);
-    ellipse(0, 0, this.size * this.innerRatio, this.size * this.innerRatio);
-
-    fill(0, 40, 50, a * 0.35);
-    ellipse(0, 0, this.size * 0.12, this.size * 0.12);
-  }
-
-  drawArc(a) {
-    noStroke();
-
-    fill(red(this.colour), green(this.colour), blue(this.colour), a);
-    arc(0, 0, this.size, this.size, this.arcStart, this.arcEnd, PIE);
-
-    fill(255, 255, 255, a * 0.12);
-    arc(
-      0,
-      0,
-      this.size * 0.62,
-      this.size * 0.62,
-      this.arcStart + 0.15,
-      this.arcEnd - 0.15,
-      PIE
-    );
-  }
-
-  drawTriangle() {
-    noStroke();
-    triangle(
-      -this.size * 0.48,
-      this.size * 0.38,
-      this.size * 0.48,
-      this.size * 0.34,
-      random(-4, 4),
-      -this.size * 0.72
-    );
-  }
-
-  drawBeam() {
-    noStroke();
-    triangle(
-      0,
-      0,
-      this.size * 1.65,
-      -this.size * 0.06,
-      this.size * 1.65,
-      this.size * 0.06
-    );
-  }
-
-  drawQuad() {
-    noStroke();
-    quad(
-      -this.size * 0.48,
-      -this.size * 0.18,
-      this.size * 0.42,
-      -this.size * 0.35,
-      this.size * 0.58,
-      this.size * 0.28,
-      -this.size * 0.28,
-      this.size * 0.48
-    );
-  }
-
-  drawThinLine() {
-    strokeWeight(random(1, 3));
-    line(-this.size * 0.8, 0, this.size * 0.8, 0);
-  }
-
-  isDead() {
-    return this.life > this.lifeMax || this.baseAlpha < 2;
+    drawSoftGlow(x, y, n.r * unit() * 8, n.c, 14 * phaseLayerAlpha(phase, "node"));
+    fill(n.c[0], n.c[1], min(100, n.c[2] + 15), n.a * phaseLayerAlpha(phase, "node"));
+    ellipse(x, y, n.r * unit() * 2, n.r * unit() * 2);
+    fill(205, 80, 12, 55 * phaseLayerAlpha(phase, "node"));
+    ellipse(x, y, n.r * unit() * 0.75, n.r * unit() * 0.75);
   }
 }
 
-// ------------------------------------------------------------
-// Burst particle class
-// ------------------------------------------------------------
-
-class BurstParticle {
-  constructor(x, y) {
-    this.x = x;
-    this.y = y;
-    this.angle = random(TWO_PI);
-    this.speed = random(1.2, 6.5);
-    this.size = random(3, 20);
-    this.life = 0;
-    this.lifeMax = random(600, 1600);
-
-    this.colour = random([
-      color(255, 235, 160),
-      color(255, 120, 80),
-      color(255, 255, 255),
-      color(120, 220, 255),
-      color(255, 185, 70)
-    ]);
-  }
-
-  update() {
-    this.life += deltaTime;
-
-    this.x += cos(this.angle) * this.speed;
-    this.y += sin(this.angle) * this.speed;
-
-    this.speed *= 0.975;
-  }
-
-  display() {
-    push();
-    blendMode(SCREEN);
-    noStroke();
-
-    let a = map(this.life, 0, this.lifeMax, 180, 0);
-    fill(red(this.colour), green(this.colour), blue(this.colour), a);
-    ellipse(this.x, this.y, this.size, this.size);
-
-    pop();
-  }
-
-  isDead() {
-    return this.life > this.lifeMax;
-  }
+function drawGrain(phase) {
+  blendMode(phase.index === 3 ? SCREEN : OVERLAY);
+  tint(0, 0, 100, phase.index === 3 ? 9 : 15);
+  image(grainLayer, 0, 0, width, height);
+  noTint();
+  blendMode(BLEND);
 }
 
-// ------------------------------------------------------------
-// Soft glow layer
-// ------------------------------------------------------------
-
-class GlowField {
-  constructor() {
-    this.x = random(width);
-    this.y = random(height);
-    this.size = random(160, 620);
-    this.offset = random(1000);
-
-    this.colour = random([
-      color(40, 150, 170),
-      color(65, 190, 210),
-      color(255, 180, 90),
-      color(190, 220, 240),
-      color(40, 120, 100)
-    ]);
-  }
-
-  update(settings) {
-    this.x += sin(frameCount * 0.002 + this.offset) * settings.speed * 0.7;
-    this.y += cos(frameCount * 0.0025 + this.offset) * settings.speed * 0.7;
-  }
-
-  display(settings) {
-    push();
-    blendMode(SCREEN);
-    noStroke();
-
-    let a = 8 * settings.opacity;
-
-    if (settings.colourMode === "burst") {
-      a = 15;
-    }
-
-    fill(red(this.colour), green(this.colour), blue(this.colour), a);
-    ellipse(this.x, this.y, this.size, this.size);
-
-    pop();
+function drawSoftGlow(x, y, radius, c, alpha) {
+  noStroke();
+  for (let i = 5; i >= 1; i--) {
+    const k = i / 5;
+    fill(c[0], c[1], c[2], (alpha * (1 - k + 0.18)) / i);
+    ellipse(x, y, radius * k * 2, radius * k * 2);
   }
 }
