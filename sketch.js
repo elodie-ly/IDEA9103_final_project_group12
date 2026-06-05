@@ -1,7 +1,19 @@
+let timeMechanic;
+
 function setup() {
-  createCanvas(400, 400);
+  createCanvas(windowWidth, windowHeight);
+  noStroke();
+
+  timeMechanic = new TimeMechanic();
 }
 
 function draw() {
-  background(220);
+  background(5, 35, 45, 35);
+
+  timeMechanic.update();
+  timeMechanic.display();
+}
+
+function windowResized() {
+  resizeCanvas(windowWidth, windowHeight);
 }
