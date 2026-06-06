@@ -15,9 +15,9 @@ function setup() {
 }
 
 function draw() {
-  background(220, 60, 8);
-
   updateAudioMechanic();
+
+  drawAudioBackground();
   drawAudioMechanic();
 
   drawInstructionText();
@@ -34,7 +34,7 @@ function windowResized() {
 function drawInstructionText() {
   push();
 
-  fill(0, 0, 100, 80);
+  fill(0, 0, 100, 78);
   noStroke();
   textAlign(CENTER, CENTER);
   textSize(14);
@@ -42,7 +42,7 @@ function drawInstructionText() {
   if (!audioStarted) {
     text("Click to start music", width / 2, height - 40);
   } else {
-    text("Music controls size, colour, transparency and movement", width / 2, height - 40);
+    text("Music controls colour, movement, scale and visual phases", width / 2, height - 40);
   }
 
   pop();
