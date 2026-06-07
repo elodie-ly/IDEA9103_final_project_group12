@@ -41,6 +41,13 @@ function initPerlinMechanic() {
 }
 
 function updatePerlinMechanic() {
+  for (let i = 0; i < perlinShapes.length; i++) {
+    let s = perlinShapes[i];
+
+    s.noiseX += s.noiseSpeed;
+    s.noiseY += s.noiseSpeed;
+    s.noiseAngle += s.noiseSpeed * 0.7;
+  }
 }
 
 function drawPerlinMechanic() {
@@ -51,10 +58,17 @@ function drawPerlinMechanic() {
   for (let i = 0; i < perlinShapes.length; i++) {
     let s = perlinShapes[i];
 
+    let offsetX = map(noise(s.noiseX), 0, 1, -s.moveRange, s.moveRange);
+    let offsetY = map(noise(s.noiseY), 0, 1, -s.moveRange, s.moveRange);
+    let angleOffset = map(noise(s.noiseAngle), 0, 1, -35, 35);
+
+    let drawX = s.x + offsetX;
+    let drawY = s.y + offsetY;
+
     push();
 
-    translate(s.x, s.y);
-    rotate(s.angle);
+    translate(drawX, drawY);
+    rotate(s.angle + angleOffset);
 
     fill(s.hue, s.sat, s.bri, s.alpha);
     stroke(s.hue, s.sat, s.bri, s.alpha + 10);
