@@ -12,12 +12,16 @@ function setup() {
   angleMode(DEGREES);
 
   initAudioMechanic();
+  initPerlinMechanic();
 }
 
 function draw() {
   updateAudioMechanic();
+  updatePerlinMechanic();
 
   drawAudioBackground();
+
+  drawPerlinMechanic();
   drawAudioMechanic();
 
   drawInstructionText();
@@ -27,8 +31,15 @@ function mousePressed() {
   startAudioMechanic();
 }
 
+function keyPressed() {
+  if (key === "p" || key === "P") {
+    resetPerlinMechanic();
+  }
+}
+
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
+  initPerlinMechanic();
 }
 
 function drawInstructionText() {
@@ -40,9 +51,9 @@ function drawInstructionText() {
   textSize(14);
 
   if (!audioStarted) {
-    text("Click to start music", width / 2, height - 40);
+    text("Click to start music | Press P to regenerate Perlin layer", width / 2, height - 40);
   } else {
-    text("Music controls colour, movement, scale and visual phases", width / 2, height - 40);
+    text("Music controls audio layer | Perlin noise creates floating geometry", width / 2, height - 40);
   }
 
   pop();
