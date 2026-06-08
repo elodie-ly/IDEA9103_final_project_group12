@@ -79,13 +79,20 @@ function drawInstructionText() {
   push();
 
   fill(255);
-  textSize(16);
-  textAlign(CENTER);
+  noStroke();
+  textAlign(CENTER, CENTER);
+  textSize(14);
 
   text(
     "Click to start music | Press P to regenerate Perlin layer",
     width / 2,
-    height - 40
+    height - 45
+  );
+
+  text(
+    "Click anywhere to create ripples and network connections",
+    width / 2,
+    height - 25
   );
 
   pop();
