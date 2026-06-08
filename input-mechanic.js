@@ -9,6 +9,7 @@ let rippleSize = 0;
 let rippleAlpha = 255;
 let clickRadius = 150;
 let connections = [];
+let clickParticles = [];
 
 function handleInputMechanic() {
   startAudioMechanic();
@@ -33,9 +34,17 @@ function handleInputMechanic() {
   clickY = mouseY;
   rippleSize = 10;
   rippleAlpha = 255;
+  for (let i = 0; i < 12; i++) {
+  clickParticles.push({
+    x: clickX,
+    y: clickY,
+    vx: random(-3, 3),
+    vy: random(-3, 3),
+    size: random(2, 6),
+    alpha: 255
+  });
+}
 
-  rippleSize = 10;
-  rippleAlpha = 255;
 
   // interaction field
   if (typeof scene !== "undefined") {
@@ -72,8 +81,8 @@ function drawInputMechanic() {
 
   // ripple physics
   rippleSize *= 0.94;
-  rippleSize += 1.8;
-  rippleAlpha *= 0.92;
+  rippleSize += 0.9;
+  rippleAlpha *= 0.96;
 
   let wobble = sin(rippleSize * 0.05) * 2;
 
@@ -97,6 +106,26 @@ circle(clickX, clickY, rippleSize * 3);
 stroke(255, rippleAlpha * 0.3);
 strokeWeight(1);
 circle(clickX, clickY, rippleSize * 4);
+// clickparticles
+for (let i = clickParticles.length - 1; i >= 0; i--) {
+
+  let p = clickParticles[i];
+
+  noStroke();
+  fill(200, 80, 100, p.alpha * 0.5);
+
+  circle(p.x, p.y, p.size);
+
+  p.x += p.vx;
+  p.y += p.vy;
+
+  p.alpha *= 0.94;
+  p.size *= 0.98;
+
+  if (p.alpha < 5) {
+    clickParticles.splice(i, 1);
+  }
+}
 
   // connection lines
   for (let i = connections.length - 1; i >= 0; i--) {
