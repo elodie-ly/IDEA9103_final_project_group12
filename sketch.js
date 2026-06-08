@@ -1,11 +1,13 @@
-// Creates the full-browser canvas and initialises the visual scene.
-function setup() {
-  console.log("setup running");
-  const canvas = createCanvas(windowWidth, windowHeight);
-  canvas.mousePressed(handleInputMechanic);
+let scene;
+let grainLayer;
 
-  // If index.html contains <main id="artwork"></main>, attach canvas to it.
-  // If not, p5 will still place the canvas in the body.
+function preload() {
+  preloadAudioMechanic();
+}
+
+function setup() {
+  const canvas = createCanvas(windowWidth, windowHeight);
+
   const artworkContainer = select("#artwork");
   if (artworkContainer) {
     canvas.parent("artwork");
@@ -13,13 +15,14 @@ function setup() {
 
   pixelDensity(Math.min(window.devicePixelRatio || 1, 2));
   colorMode(HSB, 360, 100, 100, 100);
-  angleMode(RADIANS);
   rectMode(CENTER);
   noStroke();
 
+  angleMode(RADIANS);
   buildScene();
   buildGrain();
-  preloadAudioMechanic();
+
+  angleMode(DEGREES);
   initAudioMechanic();
   initPerlinMechanic();
 
@@ -29,39 +32,47 @@ function setup() {
   }
 }
 
-// Keeps the artwork responsive when the browser window changes size.
-function windowResized() {
-  resizeCanvas(windowWidth, windowHeight);
-  if (grainLayer) buildGrain();
-}
-
-// Main animation loop: reads the current time phase, then draws each visual layer.
 function draw() {
-  updateEnergyDecay();
-  console.log("draw running");
   const phase = getPhase();
-  updateEnergyDecay();
   const seconds = millis() / 1000;
   const dt = Math.min(deltaTime || 16.67, 40) / 1000;
 
+  updateEnergyDecay();
   runTimedEvents(phase);
+
+  angleMode(RADIANS);
+
   drawGradientBackground(phase);
   drawBaseWashes(phase, seconds);
   drawCircles(phase, seconds);
   drawShards(phase, seconds);
+  drawBars(phase, seconds);
+  drawRays(phase, seconds);
+  drawNodes(phase, seconds);
+  drawPulses(dt);
+  drawParticles(dt, phase);
+  drawFlashes(dt);
+  drawGrain(phase);
+
+  angleMode(DEGREES);
+
   updateAudioMechanic();
   updatePerlinMechanic();
-
-  drawAudioBackground();
 
   drawPerlinMechanic();
   drawAudioMechanic();
   drawInputMechanic();
+
+  angleMode(RADIANS);
+  drawPhaseMeter(phase);
+
+  angleMode(DEGREES);
   drawInstructionText();
 }
 
 function mousePressed() {
   startAudioMechanic();
+  handleInputMechanic();
 }
 
 function keyPressed() {
@@ -72,36 +83,41 @@ function keyPressed() {
 
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
+
+  angleMode(RADIANS);
+  buildScene();
+
+  if (grainLayer) {
+    buildGrain();
+  }
+
+  angleMode(DEGREES);
   initPerlinMechanic();
 }
 
 function drawInstructionText() {
   push();
 
-  fill(255);
+  fill(0, 0, 100, 78);
   noStroke();
   textAlign(CENTER, CENTER);
   textSize(14);
 
-  text(
-    "Click to start music | Press P to regenerate Perlin layer",
-    width / 2,
-    height - 45
-  );
+  if (!audioStarted) {
+    text("Click to start music | Press P to regenerate Perlin layer", width / 2, height - 45);
+  } else {
+    text("Click to play / pause music | Press P to regenerate Perlin layer", width / 2, height - 45);
+  }
 
-  text(
-    "Click anywhere to create ripples and network connections",
-    width / 2,
-    height - 25
-  );
+  text("Click anywhere to create ripples and network connections", width / 2, height - 25);
 
   pop();
 }
 
-// Builds the reusable scene data. Seeded randomness keeps the composition stable each reload.
 function buildScene() {
   randomSeed(43690);
   noiseSeed(724551);
+
   scene = {
     washes: [],
     circles: [],
@@ -110,6 +126,7 @@ function buildScene() {
     rays: [],
     nodes: [],
   };
+
   eventClock = {
     warm: -9999,
     cool: -9999,
@@ -155,16 +172,19 @@ function buildScene() {
       wedge: true,
       warmBias: item[3][0] < 60 || item[3][0] > 330,
       seed: random(1000),
+      energy: 0,
     });
   }
 
   for (let i = 0; i < 76; i++) {
     const palette = random() < 0.42 ? PALETTES.cool : PALETTES.base;
     const c = pick(palette);
+
     scene.circles.push({
       x: random(-0.08, 1.08),
       y: random(-0.08, 1.08),
       r: random() < 0.22 ? random(0.11, 0.24) : random(0.018, 0.105),
+      baseR: 0,
       c,
       a: random(8, 28),
       spin: random(-1.1, 1.1),
@@ -173,7 +193,11 @@ function buildScene() {
       wedge: random() < 0.62,
       warmBias: c[0] < 62 || c[0] > 330,
       seed: random(1000),
+      energy: 0,
     });
+
+    const last = scene.circles[scene.circles.length - 1];
+    last.baseR = last.r;
   }
 
   for (let i = 0; i < 72; i++) {
@@ -192,6 +216,7 @@ function buildScene() {
 
   for (let i = 0; i < 56; i++) {
     const long = random() < 0.72;
+
     scene.bars.push({
       x: random(-0.1, 1.1),
       y: random(-0.1, 1.1),
@@ -232,11 +257,11 @@ function buildScene() {
   }
 }
 
-// Creates a small procedural noise texture that is stretched over the canvas for a print-like surface.
 function buildGrain() {
   grainLayer = createGraphics(420, 420);
   grainLayer.pixelDensity(1);
   grainLayer.loadPixels();
+
   for (let i = 0; i < grainLayer.pixels.length; i += 4) {
     const shade = random() < 0.52 ? 255 : 0;
     grainLayer.pixels[i] = shade;
@@ -244,53 +269,60 @@ function buildGrain() {
     grainLayer.pixels[i + 2] = shade;
     grainLayer.pixels[i + 3] = random(4, 18);
   }
+
   grainLayer.updatePixels();
 }
 
-// Generates irregular polygon points for CUDA-like shard shapes.
 function makeShardVerts() {
   const sides = floor(random(3, 6));
   const verts = [];
   let start = random(TWO_PI_F);
+
   for (let i = 0; i < sides; i++) {
     const a = start + (i / sides) * TWO_PI_F + random(-0.3, 0.3);
     const r = random(0.35, 1);
     verts.push([cos(a) * r, sin(a) * r]);
   }
+
   return verts;
 }
 
-// Draws the phase-dependent gradient background and large colour glows.
 function drawGradientBackground(phase) {
   blendMode(BLEND);
+
   const g = drawingContext.createLinearGradient(0, 0, width, height);
   g.addColorStop(0, phase.info.bg[0]);
   g.addColorStop(0.48, phase.info.bg[1]);
   g.addColorStop(1, phase.info.bg[2]);
+
   drawingContext.fillStyle = g;
   drawingContext.fillRect(0, 0, width, height);
 
   noStroke();
+
   const darkAlpha = phase.index === 3 ? 38 + phase.progress * 28 : 9;
+
   fill(210, 75, 8, darkAlpha);
   rect(width / 2, height / 2, width * 1.08, height * 1.08);
 
-  const warmLift =
-    phase.index === 0 ? 20 + phase.progress * 28 : phase.index === 2 ? 26 : 10;
+  const warmLift = phase.index === 0 ? 20 + phase.progress * 28 : phase.index === 2 ? 26 : 10;
+
   drawSoftGlow(width * 0.37, height * 0.47, unit() * 0.55, [30, 80, 100], warmLift);
   drawSoftGlow(width * 0.72, height * 0.63, unit() * 0.48, [190, 66, 82], 12);
 }
 
-// Draws soft translucent oval washes that create depth behind the geometry.
 function drawBaseWashes(phase, seconds) {
   blendMode(BLEND);
   noStroke();
+
   for (const s of scene.washes) {
     const driftStrength = phase.index === 1 ? 2.4 : phase.index === 3 ? 0.5 : 1;
     const dx = sin(seconds * 0.18 + s.seed) * unit() * s.drift * driftStrength;
     const dy = cos(seconds * 0.16 + s.seed * 1.7) * unit() * s.drift * driftStrength;
     const a = s.a * phaseLayerAlpha(phase, "wash");
+
     fill(s.c[0], s.c[1], s.c[2], a);
+
     push();
     translate(s.x * width + dx, s.y * height + dy);
     rotate(s.seed + seconds * 0.01);
@@ -299,13 +331,14 @@ function drawBaseWashes(phase, seconds) {
   }
 }
 
-// Draws layered circles and arc wedges; their size and spin are influenced by the current time phase.
 function drawCircles(phase, seconds) {
   for (const c of scene.circles) {
     const coolDrift = phase.index === 1 ? unit() * 0.025 : unit() * 0.006;
     const dx = sin(seconds * 0.24 + c.seed) * coolDrift;
     const dy = cos(seconds * 0.19 + c.seed * 1.3) * coolDrift;
+
     let grow = 1;
+
     if (phase.index === 0) {
       grow = 1 + phase.progress * 0.32 + sin(seconds * 0.8 + c.seed) * 0.04;
     } else if (phase.index === 2) {
@@ -318,22 +351,17 @@ function drawCircles(phase, seconds) {
     const a = c.a * phaseLayerAlpha(phase, "circle") * warmBoost;
     const x = c.x * width + dx;
     const y = c.y * height + dy;
-    let energy = 1 + c.energy * 0.8;
-
-let breathing = 1 + sin(frameCount * 0.02 + c.seed) * 0.04;
-
-let sizeBoost = energy * breathing;
-
-const r = c.baseR * unit() * grow * (1 + c.energy * 0.9);
+    const energy = 1 + (c.energy || 0) * 0.8;
+    const breathing = 1 + sin(frameCount * 0.02 + c.seed) * 0.04;
+    const r = c.baseR * unit() * grow * energy * breathing;
 
     fill(c.c[0], c.c[1], c.c[2], a);
-    let wave = sin(frameCount * 0.05 + c.seed) * 0.08;
-    let ripple = 1 + c.energy * 0.8 + wave;
-    ellipse(x, y, r * ripple * 2, r * ripple * 2);
+    ellipse(x, y, r * 2, r * 2);
 
     if (c.wedge) {
       const burstSpin = phase.index === 2 ? 3.8 : phase.index === 3 ? 0.25 : 0.75;
       const angle = c.start + seconds * c.spin * burstSpin;
+
       fill(shiftHue(c.c[0], 18), max(20, c.c[1] - 8), min(100, c.c[2] + 8), a * 0.85);
       arc(x, y, r * 2.05, r * 2.05, angle, angle + c.span, PIE);
     }
@@ -344,10 +372,10 @@ const r = c.baseR * unit() * grow * (1 + c.energy * 0.9);
   }
 }
 
-// Draws angular polygon shards that rotate faster during the Energy Burst phase.
 function drawShards(phase, seconds) {
   blendMode(BLEND);
   noStroke();
+
   for (const s of scene.shards) {
     const energySpin = phase.index === 2 ? 2.2 : phase.index === 3 ? 0.25 : 0.7;
     const drift = phase.index === 1 ? unit() * 0.024 : unit() * 0.009;
@@ -355,23 +383,27 @@ function drawShards(phase, seconds) {
     const y = s.y * height + cos(seconds * 0.17 + s.seed) * drift;
     const r = s.r * unit() * (phase.index === 2 ? 1.08 : 1);
     const a = s.a * phaseLayerAlpha(phase, "shard");
+
     push();
     translate(x, y);
     rotate(s.rot + seconds * s.spin * energySpin);
     fill(s.c[0], s.c[1], s.c[2], a);
+
     beginShape();
+
     for (const v of s.verts) {
       vertex(v[0] * r, v[1] * r);
     }
+
     endShape(CLOSE);
     pop();
   }
 }
 
-// Draws thin rectangular bars inspired by the linear fragments in the reference images.
 function drawBars(phase, seconds) {
   blendMode(BLEND);
   noStroke();
+
   for (const b of scene.bars) {
     const softDrift = phase.index === 1 ? 3.4 : phase.index === 3 ? 0.45 : 1.1;
     const energy = phase.index === 2 ? 1.7 : 1;
@@ -380,6 +412,7 @@ function drawBars(phase, seconds) {
     const w = b.w * unit() * (phase.index === 2 ? 1.12 : 1);
     const h = max(1.5, b.h * unit() * energy);
     const a = b.a * phaseLayerAlpha(phase, "bar");
+
     push();
     translate(x, y);
     rotate(b.rot + sin(seconds * 0.18 + b.seed) * 0.08);
@@ -389,47 +422,56 @@ function drawBars(phase, seconds) {
   }
 }
 
-// Draws bright ray lines; the Energy Burst phase uses ADD blend mode for stronger light.
 function drawRays(phase, seconds) {
   const intensity = phase.index === 2 ? 2.9 : phase.index === 3 ? 0.45 : 1;
+
   blendMode(phase.index === 2 ? ADD : BLEND);
+
   for (const r of scene.rays) {
     const spin = phase.index === 2 ? 2.6 : 0.38;
     const angle = r.rot + seconds * 0.12 * spin + sin(seconds + r.seed) * 0.07;
     const x = r.x * width;
     const y = r.y * height;
     const len = r.len * unit() * (phase.index === 2 ? 1.22 : 1);
+
     stroke(r.c[0], r.c[1], r.c[2], r.a * phaseLayerAlpha(phase, "ray") * intensity);
     strokeWeight(max(1, r.weight * (phase.index === 2 ? 1.4 : 1)));
     line(x, y, x + cos(angle) * len, y + sin(angle) * len);
   }
+
   noStroke();
   blendMode(BLEND);
 }
 
-// Draws small glowing node points and short connecting lines.
 function drawNodes(phase, seconds) {
   const lineAlpha = phase.index === 2 ? 42 : phase.index === 3 ? 13 : 24;
+
   blendMode(BLEND);
+
   for (const n of scene.nodes) {
     const drift = phase.index === 1 ? unit() * 0.018 : unit() * 0.005;
     const x = n.x * width + sin(seconds * 0.3 + n.seed) * drift;
     const y = n.y * height + cos(seconds * 0.22 + n.seed) * drift;
     const a = n.rot + seconds * (phase.index === 2 ? 1.8 : 0.24);
+
     stroke(n.c[0], n.c[1], n.c[2], lineAlpha * phaseLayerAlpha(phase, "node"));
     strokeWeight(1);
     line(x, y, x + cos(a) * n.len * unit(), y + sin(a) * n.len * unit());
+
     noStroke();
     drawSoftGlow(x, y, n.r * unit() * 8, n.c, 14 * phaseLayerAlpha(phase, "node"));
+
     fill(n.c[0], n.c[1], min(100, n.c[2] + 15), n.a * phaseLayerAlpha(phase, "node"));
     ellipse(x, y, n.r * unit() * 2, n.r * unit() * 2);
+
     fill(205, 80, 12, 55 * phaseLayerAlpha(phase, "node"));
     ellipse(x, y, n.r * unit() * 0.75, n.r * unit() * 0.75);
   }
 }
 
-// Overlays the grain texture to reduce flatness and make the digital image feel more tactile.
 function drawGrain(phase) {
+  if (!grainLayer) return;
+
   blendMode(phase.index === 3 ? SCREEN : OVERLAY);
   tint(0, 0, 100, phase.index === 3 ? 9 : 15);
   image(grainLayer, 0, 0, width, height);
@@ -437,18 +479,12 @@ function drawGrain(phase) {
   blendMode(BLEND);
 }
 
-// Helper function for drawing layered translucent ellipses as soft glows.
 function drawSoftGlow(x, y, radius, c, alpha) {
   noStroke();
+
   for (let i = 5; i >= 1; i--) {
     const k = i / 5;
     fill(c[0], c[1], c[2], (alpha * (1 - k + 0.18)) / i);
     ellipse(x, y, radius * k * 2, radius * k * 2);
   }
-}
-function mousePressed() {
-  handleInputMechanic();
-}
-function mousePressed() {
-  handleInputMechanic();
 }
