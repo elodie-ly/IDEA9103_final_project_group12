@@ -1,73 +1,50 @@
-console.log("INPUT FILE ACTIVE 🚀");
-// User Input Mechanic
-// Owner: Xinyue Zhang
-
 let clickCount = 0;
 let clickX = 0;
 let clickY = 0;
 let rippleSize = 0;
-let rippleAlpha = 255;
+let rippleAlpha = 0;
 let clickRadius = 150;
 let connections = [];
 let clickParticles = [];
 
 function handleInputMechanic() {
-  startAudioMechanic();
-  userStartAudio();
-  console.log("CLICK FIRED");
-
-  console.log("clicked");
-
-  // audio trigger (safe)
-  if (typeof audioStarted !== "undefined" && typeof song !== "undefined") {
-    if (!audioStarted || !song || !song.isPlaying()) {
-      userStartAudio();
-      if (song && !song.isPlaying()) {
-        song.play();
-      }
-    }
-  }
-
   clickCount++;
 
   clickX = mouseX;
   clickY = mouseY;
   rippleSize = 10;
   rippleAlpha = 255;
+
   for (let i = 0; i < 12; i++) {
-  clickParticles.push({
-    x: clickX,
-    y: clickY,
-    vx: random(-3, 3),
-    vy: random(-3, 3),
-    size: random(2, 6),
-    alpha: 255
-  });
-}
+    clickParticles.push({
+      x: clickX,
+      y: clickY,
+      vx: random(-3, 3),
+      vy: random(-3, 3),
+      size: random(2, 6),
+      alpha: 255
+    });
+  }
 
-
-  // interaction field
-  if (typeof scene !== "undefined") {
+  if (typeof scene !== "undefined" && scene && scene.circles) {
     for (let c of scene.circles) {
-
       let cx = c.x * width;
       let cy = c.y * height;
 
       let d = dist(clickX, clickY, cx, cy);
       let force = map(d, 0, clickRadius, 1, 0);
+      force = constrain(force, 0, 1);
 
       if (force > 0) {
-
-       c.energy += force * 0.8;
-       c.energy = min(c.energy, 1.2);
-       c.a += force * 28;
-
+        c.energy = (c.energy || 0) + force * 0.8;
+        c.energy = min(c.energy, 1.2);
+        c.a += force * 28;
 
         connections.push({
           x1: clickX,
           y1: clickY,
-          x2: c.x * width,
-          y2: c.y * height,
+          x2: cx,
+          y2: cy,
           alpha: 80 * force
         });
       }
@@ -76,63 +53,52 @@ function handleInputMechanic() {
 }
 
 function drawInputMechanic() {
-
   noFill();
 
-  // ripple physics
   rippleSize *= 0.94;
   rippleSize += 0.9;
   rippleAlpha *= 0.96;
 
   let wobble = sin(rippleSize * 0.05) * 2;
 
-  // 发光核心
-noStroke();
-fill(255, 255, 255, rippleAlpha * 0.15);
-circle(clickX, clickY, rippleSize * 6);
-
-// 第一层波纹
-noFill();
-stroke(255, rippleAlpha);
-strokeWeight(3);
-circle(clickX, clickY, rippleSize * 2 + wobble);
-
-// 第二层波纹
-stroke(255, rippleAlpha * 0.6);
-strokeWeight(2);
-circle(clickX, clickY, rippleSize * 3);
-
-// 第三层波纹
-stroke(255, rippleAlpha * 0.3);
-strokeWeight(1);
-circle(clickX, clickY, rippleSize * 4);
-// clickparticles
-for (let i = clickParticles.length - 1; i >= 0; i--) {
-
-  let p = clickParticles[i];
-
   noStroke();
-  fill(200, 80, 100, p.alpha * 0.5);
+  fill(0, 0, 100, rippleAlpha * 0.15);
+  circle(clickX, clickY, rippleSize * 6);
 
-  circle(p.x, p.y, p.size);
+  noFill();
+  stroke(0, 0, 100, rippleAlpha);
+  strokeWeight(3);
+  circle(clickX, clickY, rippleSize * 2 + wobble);
 
-  p.x += p.vx;
-  p.y += p.vy;
+  stroke(0, 0, 100, rippleAlpha * 0.6);
+  strokeWeight(2);
+  circle(clickX, clickY, rippleSize * 3);
 
-  p.alpha *= 0.94;
-  p.size *= 0.98;
+  stroke(0, 0, 100, rippleAlpha * 0.3);
+  strokeWeight(1);
+  circle(clickX, clickY, rippleSize * 4);
 
-  if (p.alpha < 5) {
-    clickParticles.splice(i, 1);
+  for (let i = clickParticles.length - 1; i >= 0; i--) {
+    let p = clickParticles[i];
+
+    noStroke();
+    fill(200, 80, 100, p.alpha * 0.5);
+    circle(p.x, p.y, p.size);
+
+    p.x += p.vx;
+    p.y += p.vy;
+    p.alpha *= 0.94;
+    p.size *= 0.98;
+
+    if (p.alpha < 5) {
+      clickParticles.splice(i, 1);
+    }
   }
-}
 
-  // connection lines
   for (let i = connections.length - 1; i >= 0; i--) {
-
     let lineData = connections[i];
 
-    stroke(100, 220, 255, lineData.alpha);
+    stroke(190, 80, 100, lineData.alpha);
     strokeWeight(1);
 
     line(
@@ -149,8 +115,9 @@ for (let i = clickParticles.length - 1; i >= 0; i--) {
     }
   }
 }
+
 function updateEnergyDecay() {
-  if (!scene) return;
+  if (typeof scene === "undefined" || !scene || !scene.circles) return;
 
   for (let c of scene.circles) {
     c.energy = (c.energy || 0) * 0.92;
