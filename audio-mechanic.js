@@ -99,7 +99,7 @@ function updateAudioMechanic() {
   midEnergy = map(fft.getEnergy("mid"), 0, 255, 0, 1);
   trebleEnergy = map(fft.getEnergy("treble"), 0, 255, 0, 1);
 
-  audioEnergy = constrain(smoothAudioLevel * 70, 0, 1);
+  audioEnergy = constrain(smoothAudioLevel * 90, 0, 1);
 }
 
 // Switch scene every 10 seconds based on music time
@@ -161,14 +161,14 @@ function drawSceneA() {
     let moveY = map(noise(c.moveOffsetY), 0, 1, -35, 35);
 
     let pulse = sin(frameCount * 0.9 + c.offset);
-    let pulseAmount = map(pulse, -1, 1, 0.82, 1.18);
+    let pulseAmount = map(pulse, -1, 1, 0.75, 1.35);
 
     // Audio level and bass make circles breathe, but keep them controlled
-    let audioScale = 0.62 + audioEnergy * 0.55 + bassEnergy * 0.28;
+    let audioScale = 0.72 + audioEnergy * 0.95 + bassEnergy * 0.45;
     let size = c.baseSize * pulseAmount * audioScale;
 
     // Prevent audio circles from covering the whole composition
-    size = constrain(size, 25, unit() * 0.18);
+    size = constrain(size, 30, unit() * 0.24);
 
     let currentHue = (c.hue + colourShift + i * 1.5) % 360;
     let brightness = 62 + audioEnergy * 22 + trebleEnergy * 16;
