@@ -19,8 +19,8 @@ let denseCircles = [];
 let audioShapes = [];
 let sparkleParticles = [];
 
-let numberOfDenseCircles = 34;
-let numberOfShapes = 58;
+let numberOfDenseCircles = 18;
+let numberOfShapes = 42;
 
 function preloadAudioMechanic() {
   song = loadSound("assets/music.mp3");
@@ -38,9 +38,9 @@ function initAudioMechanic() {
     denseCircles.push({
       x: random(width * 0.03, width * 0.97),
       y: random(height * 0.05, height * 0.92),
-      baseSize: random(70, 210),
+      baseSize: random(35, 115),
       hue: random([25, 45, 165, 185, 205, 260, 295, 320]),
-      alpha: random(28, 58),
+      alpha: random(14, 32),
       offset: random(360),
       moveOffsetX: random(1000),
       moveOffsetY: random(1000),
@@ -163,8 +163,12 @@ function drawSceneA() {
     let pulse = sin(frameCount * 0.9 + c.offset);
     let pulseAmount = map(pulse, -1, 1, 0.82, 1.18);
 
-    // Audio level and bass make circles breathe
-    let size = c.baseSize * pulseAmount * (0.78 + audioEnergy * 1.35 + bassEnergy * 0.65);
+    // Audio level and bass make circles breathe, but keep them controlled
+    let audioScale = 0.62 + audioEnergy * 0.55 + bassEnergy * 0.28;
+    let size = c.baseSize * pulseAmount * audioScale;
+
+    // Prevent audio circles from covering the whole composition
+    size = constrain(size, 25, unit() * 0.18);
 
     let currentHue = (c.hue + colourShift + i * 1.5) % 360;
     let brightness = 62 + audioEnergy * 22 + trebleEnergy * 16;
