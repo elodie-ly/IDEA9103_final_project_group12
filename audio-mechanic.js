@@ -111,20 +111,15 @@ function getCurrentScene() {
   return floor(frameCount / 600) % 2;
 }
 
-function drawAudioBackground() {
+function drawAudioBackgroundGlow() {
   let scene = getCurrentScene();
 
   // Background colour changes with time and music
   let timeHue = (215 + frameCount * 0.04 + bassEnergy * 45 + trebleEnergy * 70) % 360;
 
-  if (scene === 0) {
-    background(timeHue, 58 + midEnergy * 20, 7 + audioEnergy * 8);
-  } else {
-    background((timeHue + 45) % 360, 48 + midEnergy * 18, 5 + audioEnergy * 6);
-  }
-
   // Soft colour wash layer
   push();
+  blendMode(SCREEN);
   noStroke();
 
   let washHue1 = (timeHue + 70) % 360;
@@ -141,6 +136,8 @@ function drawAudioBackground() {
 
 function drawAudioMechanic() {
   let scene = getCurrentScene();
+
+  drawAudioBackgroundGlow();
 
   if (scene === 0) {
     drawSceneA();

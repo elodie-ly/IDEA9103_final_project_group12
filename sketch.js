@@ -76,11 +76,19 @@ drawInstructionText();
 }
 
 function mousePressed() {
-  startAudioMechanic();
+  if (!audioStarted) {
+    startAudioMechanic();
+  }
+
   handleInputMechanic();
 }
 
+
 function keyPressed() {
+  if (key === " ") {
+    startAudioMechanic();
+  }
+
   if (key === "p" || key === "P") {
     resetPerlinMechanic();
   }
