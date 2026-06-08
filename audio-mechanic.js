@@ -38,7 +38,7 @@ function initAudioMechanic() {
     denseCircles.push({
       x: random(width * 0.03, width * 0.97),
       y: random(height * 0.05, height * 0.92),
-      baseSize: random(35, 115),
+      baseSize: random(45, 145),
       hue: random([25, 45, 165, 185, 205, 260, 295, 320]),
       alpha: random(14, 32),
       offset: random(360),
