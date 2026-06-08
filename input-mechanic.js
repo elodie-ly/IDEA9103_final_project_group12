@@ -49,7 +49,7 @@ function handleInputMechanic() {
 
       if (force > 0) {
 
-       c.energy += force * 0.2;
+       c.energy += force * 0.8;
        c.energy = min(c.energy, 1.2);
        c.a += force * 28;
 
@@ -77,9 +77,26 @@ function drawInputMechanic() {
 
   let wobble = sin(rippleSize * 0.05) * 2;
 
-  stroke(255, rippleAlpha);
-  strokeWeight(2);
-  circle(clickX, clickY, rippleSize * 2 + wobble);
+  // 发光核心
+noStroke();
+fill(255, 255, 255, rippleAlpha * 0.15);
+circle(clickX, clickY, rippleSize * 6);
+
+// 第一层波纹
+noFill();
+stroke(255, rippleAlpha);
+strokeWeight(3);
+circle(clickX, clickY, rippleSize * 2 + wobble);
+
+// 第二层波纹
+stroke(255, rippleAlpha * 0.6);
+strokeWeight(2);
+circle(clickX, clickY, rippleSize * 3);
+
+// 第三层波纹
+stroke(255, rippleAlpha * 0.3);
+strokeWeight(1);
+circle(clickX, clickY, rippleSize * 4);
 
   // connection lines
   for (let i = connections.length - 1; i >= 0; i--) {

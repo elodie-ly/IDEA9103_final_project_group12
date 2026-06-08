@@ -56,7 +56,7 @@ function draw() {
 
   drawPerlinMechanic();
   drawAudioMechanic();
-
+  drawInputMechanic();
   drawInstructionText();
 }
 
@@ -294,18 +294,6 @@ function drawBaseWashes(phase, seconds) {
 
 // Draws layered circles and arc wedges; their size and spin are influenced by the current time phase.
 function drawCircles(phase, seconds) {
-  blendMode(BLEND);
-  noStroke();
-  textAlign(CENTER, CENTER);
-  textSize(14);
-
-  if (!audioStarted) {
-    text("Click to start music | Press P to regenerate Perlin layer", width / 2, height - 40);
-  } else {
-    text("Music controls audio layer | Perlin noise creates floating geometry", width / 2, height - 40);
-  }
-
-  pop();
   for (const c of scene.circles) {
     const coolDrift = phase.index === 1 ? unit() * 0.025 : unit() * 0.006;
     const dx = sin(seconds * 0.24 + c.seed) * coolDrift;
