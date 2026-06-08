@@ -1,6 +1,7 @@
 // time-mechanic.js
 // Owner: yunyi liu(Elodie) / yliu0027
-// Mechanic: Employ timers and events to drive the mechanic.
+// Mechanic: Time-Based Mechanic
+// Employ timers and events to drive the mechanic.
 
 // Duration of each visual stage in milliseconds.
 const PHASE_DURATION = 10000;
