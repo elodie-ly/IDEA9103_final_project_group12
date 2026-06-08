@@ -1,76 +1,3 @@
-console.log("sketch loaded");
-// ========================
-// 🔧 FIX FINAL (必备运行底座)
-// ========================
-
-// p5 constant fix
-const TWO_PI_F = Math.PI * 2;
-
-// safe globals
-let grainLayer = null;
-let eventClock = null;
-let flashes = [];
-
-// palette helper already exists but safe
-function pick(arr) {
-  return arr[Math.floor(Math.random() * arr.length)];
-}
-
-// fallback functions (防白屏)
-function getPhase() {
-  return {
-    index: 0,
-    progress: 0,
-    info: {
-      bg: ["#111", "#222", "#333"]
-    }
-  };
-}
-
-function unit() {
-  return Math.min(windowWidth, windowHeight);
-}
-
-function phaseLayerAlpha() {
-  return 1;
-}
-
-function runTimedEvents() {}
-function drawPulses() {}
-function drawFlashes() {}
-function drawParticles() {}
-function drawPhaseMeter() {}
-
-function shiftHue(h) {
-  return h;
-}
-
-function makeFlash() {
-  return {};
-}
-const PALETTES = {
-  base: [
-    [210, 30, 95],
-    [190, 60, 85],
-    [40, 80, 95],
-    [300, 40, 90],
-  ],
-  cool: [
-    [200, 70, 90],
-    [220, 50, 80],
-    [180, 60, 85],
-  ],
-  warm: [
-    [20, 80, 95],
-    [10, 70, 90],
-    [35, 85, 100],
-  ],
-  burst: [
-    [320, 80, 95],
-    [280, 70, 90],
-  ],
-};
-
 // Creates the full-browser canvas and initialises the visual scene.
 function setup() {
   console.log("setup running");
@@ -151,16 +78,17 @@ function windowResized() {
 function drawInstructionText() {
   push();
 
-  fill(0, 0, 100, 78);
-  drawBars(phase, seconds);
-  drawRays(phase, seconds);
-  drawNodes(phase, seconds);
-  drawPulses(dt);
-  drawFlashes(dt);
-  drawParticles(dt, phase);
-  drawInputMechanic();
-  drawGrain(phase);
-  drawPhaseMeter(phase);
+  fill(255);
+  textSize(16);
+  textAlign(CENTER);
+
+  text(
+    "Click to start music | Press P to regenerate Perlin layer",
+    width / 2,
+    height - 40
+  );
+
+  pop();
 }
 
 // Builds the reusable scene data. Seeded randomness keeps the composition stable each reload.
