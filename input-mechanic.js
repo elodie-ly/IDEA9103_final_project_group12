@@ -1,3 +1,4 @@
+console.log("INPUT FILE ACTIVE 🚀");
 // User Input Mechanic
 // Owner: Xinyue Zhang
 
@@ -9,62 +10,78 @@ let rippleAlpha = 255;
 let clickRadius = 150;
 let connections = [];
 
-function mousePressed() {
+function handleInputMechanic() {
+  startAudioMechanic();
+  userStartAudio();
+  console.log("CLICK FIRED");
+
+  console.log("clicked");
+
+  // audio trigger (safe)
+  if (typeof audioStarted !== "undefined" && typeof song !== "undefined") {
+    if (!audioStarted || !song || !song.isPlaying()) {
+      userStartAudio();
+      if (song && !song.isPlaying()) {
+        song.play();
+      }
+    }
+  }
 
   clickCount++;
 
   clickX = mouseX;
   clickY = mouseY;
+  rippleSize = 10;
+  rippleAlpha = 255;
 
   rippleSize = 10;
   rippleAlpha = 255;
 
- for (let c of scene.circles) {
+  // interaction field
+  if (typeof scene !== "undefined") {
+    for (let c of scene.circles) {
 
-  let d = dist(
-    clickX,
-    clickY,
-    c.x * width,
-    c.y * height
-  );
+      let cx = c.x * width;
+      let cy = c.y * height;
 
-  if (d < clickRadius) {
+      let d = dist(clickX, clickY, cx, cy);
+      let force = map(d, 0, clickRadius, 1, 0);
 
-  c.r = c.r * 1.15;
- c.a = c.a + 20;
+      if (force > 0) {
 
-  connections.push({
-    x1: clickX,
-    y1: clickY,
-    x2: c.x * width,
-    y2: c.y * height,
-    alpha: 15
-  });
+       c.energy += force * 0.2;
+       c.energy = min(c.energy, 1.2);
+       c.a += force * 28;
 
-}
 
-}
-  console.log(clickCount);
-
+        connections.push({
+          x1: clickX,
+          y1: clickY,
+          x2: c.x * width,
+          y2: c.y * height,
+          alpha: 80 * force
+        });
+      }
+    }
+  }
 }
 
 function drawInputMechanic() {
 
   noFill();
 
+  // ripple physics
+  rippleSize *= 0.94;
+  rippleSize += 1.8;
+  rippleAlpha *= 0.92;
+
+  let wobble = sin(rippleSize * 0.05) * 2;
+
   stroke(255, rippleAlpha);
+  strokeWeight(2);
+  circle(clickX, clickY, rippleSize * 2 + wobble);
 
-  circle(
-    clickX,
-    clickY,
-    rippleSize
-  );
-
-  if (rippleSize > 0) {
-    rippleSize += 3;
-    rippleAlpha -= 4;
-  }
-
+  // connection lines
   for (let i = connections.length - 1; i >= 0; i--) {
 
     let lineData = connections[i];
@@ -79,12 +96,19 @@ function drawInputMechanic() {
       lineData.y2
     );
 
-    lineData.alpha -= 2;
+    lineData.alpha *= 0.92;
 
-    if (lineData.alpha <= 0) {
+    if (lineData.alpha <= 1) {
       connections.splice(i, 1);
     }
-
   }
+}
+function updateEnergyDecay() {
+  if (!scene) return;
 
+  for (let c of scene.circles) {
+    c.energy = (c.energy || 0) * 0.92;
+    c.energy = Math.min(c.energy, 1.2);
+    c.a = lerp(c.a, 20, 0.05);
+  }
 }
