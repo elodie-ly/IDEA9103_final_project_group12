@@ -42,32 +42,37 @@ function draw() {
 
   angleMode(RADIANS);
 
-  drawGradientBackground(phase);
-  drawBaseWashes(phase, seconds);
-  drawCircles(phase, seconds);
-  drawShards(phase, seconds);
-  drawBars(phase, seconds);
-  drawRays(phase, seconds);
-  drawNodes(phase, seconds);
-  drawPulses(dt);
-  drawParticles(dt, phase);
-  drawFlashes(dt);
-  drawGrain(phase);
+ // 1. Time-based background
+drawGradientBackground(phase);
+drawBaseWashes(phase, seconds);
 
-  angleMode(DEGREES);
+// 2. Main CUDA base layer
+drawCircles(phase, seconds);
+drawShards(phase, seconds);
+drawBars(phase, seconds);
+drawRays(phase, seconds);
+drawNodes(phase, seconds);
 
-  updateAudioMechanic();
-  updatePerlinMechanic();
+// 3. Time-based event effects
+drawPulses(dt);
+drawParticles(dt, phase);
+drawFlashes(dt);
+drawGrain(phase);
 
-  drawPerlinMechanic();
-  drawAudioMechanic();
-  drawInputMechanic();
+// 4. Perlin noise layer
+updatePerlinMechanic();
+drawPerlinMechanic();
 
-  angleMode(RADIANS);
-  drawPhaseMeter(phase);
+// 5. Audio reactive layer
+updateAudioMechanic();
+drawAudioMechanic();
 
-  angleMode(DEGREES);
-  drawInstructionText();
+// 6. User input layer
+drawInputMechanic();
+
+// 7. UI feedback
+drawPhaseMeter(phase);
+drawInstructionText();
 }
 
 function mousePressed() {
