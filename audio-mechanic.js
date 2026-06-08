@@ -112,12 +112,8 @@ function getCurrentScene() {
 }
 
 function drawAudioBackgroundGlow() {
-  let scene = getCurrentScene();
-
-  // Background colour changes with time and music
   let timeHue = (215 + frameCount * 0.04 + bassEnergy * 45 + trebleEnergy * 70) % 360;
 
-  // Soft colour wash layer
   push();
   blendMode(SCREEN);
   noStroke();
@@ -131,6 +127,7 @@ function drawAudioBackgroundGlow() {
   fill(washHue2, 65, 50, 7 + trebleEnergy * 10);
   ellipse(width * 0.75, height * 0.62, width * 0.60, height * 0.50 + midEnergy * 150);
 
+  blendMode(BLEND);
   pop();
 }
 
@@ -360,30 +357,40 @@ function drawAudioEnergyMeter(scene) {
   rectMode(CORNER);
   noStroke();
 
-  let meterX = 60;
-  let meterY = height - 42;
-  let meterWidth = 300;
-  let meterHeight = 7;
+  const margin = 24;
+  const meterWidth = 300;
+  const meterHeight = 7;
 
+  // Right bottom position
+  const meterX = width - meterWidth - margin;
+  const meterY = height - margin - 26;
+
+  // Background bar
   fill(0, 0, 100, 14);
-  rect(meterX, meterY, meterWidth, meterHeight, 4);
+  rect(meterX, meterY, meterWidth, meterHeight, 8);
 
+  // Audio energy bar
   fill(180, 70, 100, 70);
-  rect(meterX, meterY, meterWidth * audioEnergy, meterHeight, 4);
+  rect(meterX, meterY, meterWidth * audioEnergy, meterHeight, 8);
 
+  // Label
   fill(0, 0, 100, 78);
   textSize(12);
-  textAlign(LEFT, CENTER);
+  textAlign(LEFT, BOTTOM);
+
+  let label = "";
 
   if (!audioStarted) {
-    text("Click to start music", meterX, meterY - 14);
+    label = "Audio: Press Space to start music";
   } else {
     if (scene === 0) {
-      text("Scene A: audio level drives layered circle pulses", meterX, meterY - 14);
+      label = "Audio: Level drives circle pulses";
     } else {
-      text("Scene B: frequency data reshapes the ecosystem", meterX, meterY - 14);
+      label = "Audio: Frequency reshapes geometry";
     }
   }
+
+  text(label, meterX, meterY - 8);
 
   pop();
 }

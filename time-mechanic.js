@@ -1,3 +1,7 @@
+// time-mechanic.js
+// Owner: yunyi liu(Elodie) / yliu0027
+// Mechanic: Employ timers and events to drive the mechanic.
+
 // Duration of each visual stage in milliseconds.
 const PHASE_DURATION = 10000;
 const CYCLE_DURATION = PHASE_DURATION * 4;
@@ -280,28 +284,45 @@ function drawFlashes(dt) {
 
 // Draws the bottom timeline meter so viewers can see the current phase.
 function drawPhaseMeter(phase) {
-  const margin = clamp(unit() * 0.022, 16, 26);
-  const meterWidth = min(width - margin * 2, 470);
-  const meterHeight = 3;
+  const margin = 24;
+  const meterWidth = 360;
+  const meterHeight = 5;
+
+  // Left bottom position
   const x = margin;
-  const y = height - margin;
+  const y = height - margin - 26;
+
   const seg = meterWidth / 4;
 
-  blendMode(BLEND);
+  push();
+
+  rectMode(CORNER);
   noStroke();
-  fill(0, 0, 100, 10);
-  rect(x + meterWidth / 2, y, meterWidth, meterHeight);
+
+  // Background bar
+  fill(0, 0, 100, 12);
+  rect(x, y, meterWidth, meterHeight, 8);
+
+  // Four phase progress segments
   for (let i = 0; i < 4; i++) {
     const c = PHASES[i].meter;
     const progress = i < phase.index ? 1 : i === phase.index ? phase.progress : 0;
-    fill(c[0], c[1], c[2], i === phase.index ? 62 : 20);
-    rect(x + i * seg + (seg * progress) / 2, y, seg * progress, meterHeight);
+
+    fill(c[0], c[1], c[2], i === phase.index ? 70 : 25);
+    rect(x + i * seg, y, seg * progress, meterHeight, 8);
   }
 
+  // Text label
   textAlign(LEFT, BOTTOM);
-  textSize(clamp(unit() * 0.012, 11, 14));
-  fill(205, 24, 96, 68);
-  text(`${phase.info.name}  ${phase.info.range}`, x, y - 10);
+  textSize(12);
+  fill(0, 0, 100, 75);
+  text(
+    `Time: ${phase.info.name}  ${phase.info.range}`,
+    x,
+    y - 8
+  );
+
+  pop();
 }
 
 // Returns phase-specific opacity multipliers for each visual layer.

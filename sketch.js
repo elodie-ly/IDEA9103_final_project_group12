@@ -40,46 +40,49 @@ function draw() {
   updateEnergyDecay();
   runTimedEvents(phase);
 
+  // =========================
+  // 1. Time-based background and base CUDA layer
+  // These functions use radians.
+  // =========================
   angleMode(RADIANS);
 
- // 1. Time-based background
-drawGradientBackground(phase);
-drawBaseWashes(phase, seconds);
+  drawGradientBackground(phase);
+  drawBaseWashes(phase, seconds);
 
-// 2. Main CUDA base layer
-drawCircles(phase, seconds);
-drawShards(phase, seconds);
-drawBars(phase, seconds);
-drawRays(phase, seconds);
-drawNodes(phase, seconds);
+  drawCircles(phase, seconds);
+  drawShards(phase, seconds);
+  drawBars(phase, seconds);
+  drawRays(phase, seconds);
+  drawNodes(phase, seconds);
 
-// 3. Time-based event effects
-drawPulses(dt);
-drawParticles(dt, phase);
-drawFlashes(dt);
-drawGrain(phase);
+  drawPulses(dt);
+  drawParticles(dt, phase);
+  drawFlashes(dt);
+  drawGrain(phase);
 
-// 4. Perlin noise layer
-updatePerlinMechanic();
-drawPerlinMechanic();
+  // =========================
+  // 2. Perlin + Audio + Input layers
+  // These are easier to control in degrees.
+  // =========================
+  angleMode(DEGREES);
 
-// 5. Audio reactive layer
-updateAudioMechanic();
-drawAudioMechanic();
+  updatePerlinMechanic();
+  drawPerlinMechanic();
 
-// 6. User input layer
-drawInputMechanic();
+  updateAudioMechanic();
+  drawAudioMechanic();
 
-// 7. UI feedback
-drawPhaseMeter(phase);
-drawInstructionText();
+  drawInputMechanic();
+
+  // =========================
+  // 3. UI feedback layer
+  // =========================
+  drawPhaseMeter(phase);
+  drawInstructionText();
 }
 
 function mousePressed() {
-  if (!audioStarted) {
-    startAudioMechanic();
-  }
-
+  // It creates ripples, particles and network connections.
   handleInputMechanic();
 }
 
@@ -111,18 +114,28 @@ function windowResized() {
 function drawInstructionText() {
   push();
 
-  fill(0, 0, 100, 78);
+  const x = 24;
+  const y = 28;
+
+  textAlign(LEFT, TOP);
+  textSize(13);
   noStroke();
-  textAlign(CENTER, CENTER);
-  textSize(14);
+
+  // Semi-transparent background panel
+  fill(0, 0, 0, 28);
+  rectMode(CORNER);
+  rect(x - 10, y - 10, 390, 78, 12);
+
+  fill(0, 0, 100, 82);
 
   if (!audioStarted) {
-    text("Click to start music | Press P to regenerate Perlin layer", width / 2, height - 45);
+    text("Press Space: start music", x, y);
   } else {
-    text("Click to play / pause music | Press P to regenerate Perlin layer", width / 2, height - 45);
+    text("Press Space: play / pause music", x, y);
   }
 
-  text("Click anywhere to create ripples and network connections", width / 2, height - 25);
+  text("Click canvas: create ripple interaction", x, y + 22);
+  text("Press P: regenerate Perlin layer", x, y + 44);
 
   pop();
 }

@@ -1,3 +1,5 @@
+// background-layer.js
+// This file stores optional random background palettes.
 function generateBackgroundPalette() {
   let palettes = [
     {
@@ -41,7 +43,7 @@ function generateBackgroundPalette() {
   return random(palettes);
 }
 
-function drawGradientBackground(palette) {
+function drawOptionalBackgroundPalette(palette) {
   let topColor = palette.top;
   let middleColor = palette.middle;
   let bottomColor = palette.bottom;
