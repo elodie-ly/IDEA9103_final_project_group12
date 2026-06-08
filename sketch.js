@@ -94,6 +94,7 @@ function setup() {
   buildGrain();
   preloadAudioMechanic();
   initAudioMechanic();
+  initPerlinMechanic();
 
   const loading = select("#loading");
   if (loading) {
@@ -122,8 +123,35 @@ function draw() {
   drawCircles(phase, seconds);
   drawShards(phase, seconds);
   updateAudioMechanic();
+  updatePerlinMechanic();
+
   drawAudioBackground();
+
+  drawPerlinMechanic();
   drawAudioMechanic();
+
+  drawInstructionText();
+}
+
+function mousePressed() {
+  startAudioMechanic();
+}
+
+function keyPressed() {
+  if (key === "p" || key === "P") {
+    resetPerlinMechanic();
+  }
+}
+
+function windowResized() {
+  resizeCanvas(windowWidth, windowHeight);
+  initPerlinMechanic();
+}
+
+function drawInstructionText() {
+  push();
+
+  fill(0, 0, 100, 78);
   drawBars(phase, seconds);
   drawRays(phase, seconds);
   drawNodes(phase, seconds);
@@ -340,6 +368,16 @@ function drawBaseWashes(phase, seconds) {
 function drawCircles(phase, seconds) {
   blendMode(BLEND);
   noStroke();
+  textAlign(CENTER, CENTER);
+  textSize(14);
+
+  if (!audioStarted) {
+    text("Click to start music | Press P to regenerate Perlin layer", width / 2, height - 40);
+  } else {
+    text("Music controls audio layer | Perlin noise creates floating geometry", width / 2, height - 40);
+  }
+
+  pop();
   for (const c of scene.circles) {
     const coolDrift = phase.index === 1 ? unit() * 0.025 : unit() * 0.006;
     const dx = sin(seconds * 0.24 + c.seed) * coolDrift;
