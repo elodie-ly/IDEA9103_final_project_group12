@@ -49,7 +49,10 @@ My mechanic is responsible for using audio level and frequency data from a music
 
 The overall audio level controls the scale, transparency, brightness, and movement intensity of the visual elements. When the music becomes louder, circular forms expand more clearly, the colours become brighter, and the movement becomes more active. Frequency data is also used to create different visual responses: bass frequencies influence larger circle pulses, mid frequencies affect geometric movement and structure, and higher frequencies create small bright details and more energetic visual reactions.
 
+To avoid the visual outcome feeling too repetitive, I also added scene switching within the audio mechanic. The system changes between two visual states every ten seconds based on the music playback time. One scene focuses on layered circular pulses driven by audio level, while the other scene uses frequency data to reshape a more open geometric ecosystem. This creates a stronger sense of rhythm, progression, and variation throughout the experience.
+
 This mechanic supports the project concept by making the abstract ecosystem feel alive and responsive. Instead of adding a separate music visualiser, the audio mechanic becomes part of the same visual language as the rest of the artwork, using circles, colour shifts, transparency, motion, and scene changes to connect sound with the generative composition.
+
 
 
 
