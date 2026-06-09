@@ -134,7 +134,7 @@ function drawInstructionText() {
     text("Press Space: play / pause music", x, y);
   }
 
-  text("Click canvas: create glowing node interaction", x, y + 22);
+  text("Click canvas: create halo pulses, particles and network links", x, y + 22);
   text("Press P: regenerate Perlin layer", x, y + 44);
 
   pop();

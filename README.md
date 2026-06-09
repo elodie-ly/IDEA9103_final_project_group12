@@ -45,11 +45,15 @@ Our team will reinterpret Manolo Gamboa Naon’s *CUDA*, a colourful generative 
 **Owner:** Yibei Yang / yyan0553
 **Mechanic:** Use audio level and frequency data to drive the mechanic.
 
-The audio mechanic will use music frequency data to influence the behaviour of the generative abstract ecosystem. Different sound frequencies and volume levels will affect particle movement, shape scaling, transparency, colour intensity, and animation speed in real time.
+My mechanic is responsible for using audio level and frequency data from a music track to drive the visual behaviour of the generative ecosystem. The music is analysed through amplitude and FFT data, allowing the system to respond to both overall volume and different frequency ranges.
 
-For example, low-frequency sounds may cause larger circular forms to slowly pulse and expand, while high-frequency sounds may generate faster movement, flickering particles, or sudden bursts of colour. The system will visually react to sound energy, creating a strong connection between audio and motion.
+The overall audio level controls the scale, transparency, brightness, and movement intensity of the visual elements. When the music becomes louder, circular forms expand more clearly, the colours become brighter, and the movement becomes more active. Frequency data is also used to create different visual responses: bass frequencies influence larger circle pulses, mid frequencies affect geometric movement and structure, and higher frequencies create small bright details and more energetic visual reactions.
 
-This mechanic supports the project vision by transforming the artwork into a dynamic audiovisual environment rather than a static composition. The constantly changing sound input will make the ecosystem feel immersive, organic, and unpredictable.
+To avoid the visual outcome feeling too repetitive, I also added scene switching within the audio mechanic. The system changes between two visual states every ten seconds based on the music playback time. One scene focuses on layered circular pulses driven by audio level, while the other scene uses frequency data to reshape a more open geometric ecosystem. This creates a stronger sense of rhythm, progression, and variation throughout the experience.
+
+This mechanic supports the project concept by making the abstract ecosystem feel alive and responsive. Instead of adding a separate music visualiser, the audio mechanic becomes part of the same visual language as the rest of the artwork, using circles, colour shifts, transparency, motion, and scene changes to connect sound with the generative composition.
+
+
 
 
 
@@ -141,9 +145,13 @@ The user does not directly control this mechanic, but they will experience it th
 
 **Mechanic:** Employ timers and events to drive the mechanic.
 
-The mouse and keyboard controls will make the artwork feel more interactive and alive. Instead of the visuals running on their own all the time, the audience can change what happens on the screen through simple actions. Moving the mouse will affect how the shapes and particles move, making them follow, avoid, or react to the cursor. Clicking the mouse can create quick energy explosions, bright flashes, or spinning effects across the canvas.
-The keyboard will let users control different visual modes and effects. For example, pressing certain keys can switch between the warm build-up, cool drift, energy burst, and dark reset phases. Other keys can speed up movement, increase the number of particles, pause the animation, or trigger extra visual effects.
-By adding mouse and keyboard interaction, the artwork becomes more playful and immersive because the audience is able to influence the visuals in real time instead of only watching a looping animation.
+This mechanic introduces real-time user interaction through mouse events, allowing the audience to actively influence the visual system. Rather than passively observing the animation, users can trigger energetic visual responses through clicking and hovering.
+
+Mouse clicks generate a burst of activity at the cursor location. Each click creates a glowing halo pulse surrounded by expanding particles and radiating light rays. Nearby network nodes react to the event by increasing their energy levels, while temporary connection lines form between the click position and surrounding nodes. These effects gradually fade over time, creating a sense of energy propagation throughout the system.
+
+Hover interaction provides a more subtle but continuous form of feedback. As the cursor moves across the canvas, nearby nodes become brighter and slightly larger based on their distance from the mouse. This distance-mapped interaction creates the impression of an invisible force field moving through the network, making the visual environment feel responsive and alive.
+
+The mechanic employs event-driven programming, timers, particle systems, distance mapping, and procedural animation techniques explored throughout the course. Together, the click and hover interactions transform the artwork from a passive visual display into an interactive experience where users can directly influence the behaviour and appearance of the generative system in real time.
 
 ---
 
@@ -166,7 +174,11 @@ project-folder/
 ├── time-mechanic.js
 ├── audio-mechanic.js
 ├── perlin-mechanic.js
-├── user-input-mechanic.js
+├── input-mechanic.js
+<<<<<<< HEAD
+├── background-layer.js
+=======
+>>>>>>> 76fcadf70c84770aed9bcb913e0db9b55cf28e3a
 ├── assets/
 └── libraries/
     ├── p5.min.js
@@ -206,6 +218,26 @@ The project uses blend modes such as `BLEND`, `SCREEN`, `ADD`, and `OVERLAY`, to
 ## 7. Responsive Canvas
 
 The canvas uses `windowWidth`, `windowHeight`, and `windowResized()` so the artwork scales correctly when the browser window changes size. The helper function `unit()` uses the smaller side of the screen to keep proportions consistent.
+
+## 8. Randomised Shape Attributes
+
+`random()` is used to assign different properties to each geometric object. These properties include shape type, x and y position, size, width, height, colour hue, saturation, brightness, alpha value, line weight, rotation angle, movement range, and noise offsets. This creates visual variety without manually placing each shape.
+
+## 9. Regenerating the Layer
+
+The function `resetPerlinMechanic()` calls `initPerlinMechanic()` again when the user presses **P**. This clears the existing Perlin shape layer and creates a new arrangement. This technique gives the project a simple regeneration interaction while keeping the same CUDA-inspired visual style.
+
+## 10. Perlin Noise Offsets
+
+Each shape stores separate noise offset values for x movement, y movement, and rotation. These offset values are updated over time in `updatePerlinMechanic()`. This allows every shape to follow its own movement path instead of sharing one global animation.
+
+## 11. Independent Shape Transformation
+
+`push()` and `pop()` are used around each shape so that translation and rotation only affect the current object. `translate()` moves each shape to its calculated position, while `rotate()` applies both its original random angle and its Perlin-based rotation offset. This makes every object behave as an independent visual element.
+
+## 12. Geometric Drawing
+
+The layer uses basic p5.js drawing functions including `ellipse()`, `rect()`, `triangle()`, and `line()`. These shapes were chosen because they match the visual language of the CUDA reference, which relies on overlapping geometric fragments, transparent forms, and abstract composition.
 \\\\
 
 ---
@@ -219,6 +251,15 @@ For the time-based version:
 4. **30–40 seconds:** Dark reset slows movement and fades the canvas.
 5. The cycle repeats every 40 seconds.
 
+## User Input Interaction
+Move the mouse across the canvas to activate nearby nodes.
+Hovering near nodes causes them to brighten and increase in visual intensity.
+Click anywhere on the canvas to generate a glowing halo pulse.
+Each click also creates particle bursts, radiating rays, and temporary connection lines between nearby nodes.
+Repeated clicks can create overlapping energy fields and complex visual interactions.
+
+## Perlin Noise and Randomness
+My mechanic uses random values to generate CUDA-inspired geometric shapes with different positions, sizes, colours, opacity, and rotations. Perlin noise makes these shapes drift and rotate smoothly, creating a natural floating effect. The user can press **P** to regenerate this layer and create a new random composition. This adds movement, depth, and controlled randomness to the overall abstract visual system.
 
 # Part 6: AI Acknowledgement
 Optimised code comments and drafted a README document. This helped clarify the purpose of the functions, explained how p5.js’s timing logic works, and improved the structure of the project documentation.
