@@ -259,6 +259,14 @@ Repeated clicks can create overlapping energy fields and complex visual interact
 ## Perlin Noise and Randomness
 My mechanic uses random values to generate CUDA-inspired geometric shapes with different positions, sizes, colours, opacity, and rotations. Perlin noise makes these shapes drift and rotate smoothly, creating a natural floating effect. The user can press **P** to regenerate this layer and create a new random composition. This adds movement, depth, and controlled randomness to the overall abstract visual system.
 
+## Audio mechanic
+
+To experience the artwork, open the project in a browser and press the **Space** key to start the music. Once the music begins, the visual system will automatically respond to the audio level and frequency data in real time.
+
+The audience does not need to control every element directly. Instead, they are invited to watch how the generative ecosystem changes with the sound. Louder parts of the music make circular forms expand, colours become brighter, transparency increase, and movement become more active. Different frequency ranges also affect the visuals: bass creates larger pulsing circles, mid frequencies influence geometric structures, and high frequencies produce brighter details.
+
+The visual state changes approximately every ten seconds, switching between different audio-reactive scenes. One scene focuses on layered circle pulses driven by audio level, while another scene uses frequency data to reshape a more open abstract ecosystem. Users can continue watching the work evolve as the music progresses.
+
 # Part 6: AI Acknowledgement
 Optimised code comments and drafted a README document. This helped clarify the purpose of the functions, explained how p5.js’s timing logic works, and improved the structure of the project documentation.
 
