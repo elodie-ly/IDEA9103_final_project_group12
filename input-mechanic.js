@@ -1,5 +1,8 @@
 // input-mechanic.js
-// Mouse input creates CUDA-style glowing nodes, soft halos and short ray connections.
+// Owner: Xinyue Zhang / xzha0936
+// Mechanic: User Input Mechanic
+// Mouse clicks generate halo pulses, particles, rays, and node connections.
+// Hover interaction brightens nearby nodes and increases visual intensity.
 
 let clickCount = 0;
 let clickRadius = 190;
