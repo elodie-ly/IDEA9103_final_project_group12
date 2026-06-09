@@ -45,11 +45,12 @@ Our team will reinterpret Manolo Gamboa Naon’s *CUDA*, a colourful generative 
 **Owner:** Yibei Yang / yyan0553
 **Mechanic:** Use audio level and frequency data to drive the mechanic.
 
-The audio mechanic will use music frequency data to influence the behaviour of the generative abstract ecosystem. Different sound frequencies and volume levels will affect particle movement, shape scaling, transparency, colour intensity, and animation speed in real time.
+My mechanic is responsible for using audio level and frequency data from a music track to drive the visual behaviour of the generative ecosystem. The music is analysed through amplitude and FFT data, allowing the system to respond to both overall volume and different frequency ranges.
 
-For example, low-frequency sounds may cause larger circular forms to slowly pulse and expand, while high-frequency sounds may generate faster movement, flickering particles, or sudden bursts of colour. The system will visually react to sound energy, creating a strong connection between audio and motion.
+The overall audio level controls the scale, transparency, brightness, and movement intensity of the visual elements. When the music becomes louder, circular forms expand more clearly, the colours become brighter, and the movement becomes more active. Frequency data is also used to create different visual responses: bass frequencies influence larger circle pulses, mid frequencies affect geometric movement and structure, and higher frequencies create small bright details and more energetic visual reactions.
 
-This mechanic supports the project vision by transforming the artwork into a dynamic audiovisual environment rather than a static composition. The constantly changing sound input will make the ecosystem feel immersive, organic, and unpredictable.
+This mechanic supports the project concept by making the abstract ecosystem feel alive and responsive. Instead of adding a separate music visualiser, the audio mechanic becomes part of the same visual language as the rest of the artwork, using circles, colour shifts, transparency, motion, and scene changes to connect sound with the generative composition.
+
 
 
 
