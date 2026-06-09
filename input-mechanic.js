@@ -27,8 +27,8 @@ function handleInputMechanic() {
     age: 0,
     life: 2.8,
     coreSize: random(7, 12),
-    haloSize: random(70, 120),
-    pulseSpeed: random(3.5, 5.5)
+    haloSize: random(120, 180),
+    pulseSpeed: random(6, 10)
   });
 
   // Short thin rays like the video.
@@ -49,9 +49,9 @@ function handleInputMechanic() {
   }
 
   // Small glowing particles near the click.
-  for (let i = 0; i < 10; i++) {
+  for (let i = 0; i < 25; i++) {
     let a = random(360);
-    let speed = random(0.4, 2.2);
+    let speed = random(1.5, 5);
 
     clickParticles.push({
       x: x,
@@ -59,7 +59,7 @@ function handleInputMechanic() {
       vx: cos(a) * speed,
       vy: sin(a) * speed,
       hue: random([35, 45, 185, 195, 205, 8]),
-      size: random(2.5, 6.5),
+      size: random(5, 12),
       age: 0,
       life: random(1.1, 2.2)
     });
@@ -108,6 +108,8 @@ function drawInputMechanic() {
   drawClickRays(dt);
   drawClickConnections(dt);
   drawClickParticles(dt);
+
+  applyHoverRepulsion();
 }
 
 function drawClickHalos(dt) {
@@ -127,12 +129,12 @@ function drawClickHalos(dt) {
     }
 
     let fade = 1 - k;
-    let pulse = 1 + sin(frameCount * n.pulseSpeed) * 0.08;
+    let pulse = 1 + sin(frameCount * n.pulseSpeed*0.02) * 0.25;
 
     // Large soft halo.
     for (let j = 5; j >= 1; j--) {
       let layer = j / 5;
-      fill(n.hue, 70, 100, 7 * fade * layer);
+      fill(n.hue, 70, 100, 15 * fade * layer);
       ellipse(
         n.x,
         n.y,
@@ -142,7 +144,7 @@ function drawClickHalos(dt) {
     }
 
     // Middle glow.
-    fill(n.hue, 85, 100, 28 * fade);
+    fill(n.hue, 85, 100, 70 * fade);
     ellipse(n.x, n.y, n.coreSize * 4.2, n.coreSize * 4.2);
 
     // Dark centre dot like the video.
@@ -150,7 +152,7 @@ function drawClickHalos(dt) {
     ellipse(n.x, n.y, n.coreSize * 1.25, n.coreSize * 1.25);
 
     // Bright small centre.
-    fill(n.hue, 90, 100, 90 * fade);
+    fill(n.hue, 90, 100, 100 * fade);
     ellipse(n.x, n.y, n.coreSize * 0.65, n.coreSize * 0.65);
   }
 
@@ -253,6 +255,33 @@ function drawClickParticles(dt) {
 
   blendMode(BLEND);
   pop();
+}
+
+function applyHoverRepulsion() {
+
+  if (!scene || !scene.circles) return;
+
+  for (let c of scene.circles) {
+
+    let cx = c.x * width;
+    let cy = c.y * height;
+
+    let d = dist(mouseX, mouseY, cx, cy);
+
+    if (d < 350) {
+
+      let force = map(
+        d,
+        0,
+        350,
+        1,
+        0
+      );
+
+      c.energy += force * 0.08;
+      c.a += force * 2;
+    }
+  }
 }
 
 function updateEnergyDecay() {

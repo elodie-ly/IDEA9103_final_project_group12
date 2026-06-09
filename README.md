@@ -141,9 +141,13 @@ The user does not directly control this mechanic, but they will experience it th
 
 **Mechanic:** Employ timers and events to drive the mechanic.
 
-The mouse and keyboard controls will make the artwork feel more interactive and alive. Instead of the visuals running on their own all the time, the audience can change what happens on the screen through simple actions. Moving the mouse will affect how the shapes and particles move, making them follow, avoid, or react to the cursor. Clicking the mouse can create quick energy explosions, bright flashes, or spinning effects across the canvas.
-The keyboard will let users control different visual modes and effects. For example, pressing certain keys can switch between the warm build-up, cool drift, energy burst, and dark reset phases. Other keys can speed up movement, increase the number of particles, pause the animation, or trigger extra visual effects.
-By adding mouse and keyboard interaction, the artwork becomes more playful and immersive because the audience is able to influence the visuals in real time instead of only watching a looping animation.
+This mechanic introduces real-time user interaction through mouse events, allowing the audience to actively influence the visual system. Rather than passively observing the animation, users can trigger energetic visual responses through clicking and hovering.
+
+Mouse clicks generate a burst of activity at the cursor location. Each click creates a glowing halo pulse surrounded by expanding particles and radiating light rays. Nearby network nodes react to the event by increasing their energy levels, while temporary connection lines form between the click position and surrounding nodes. These effects gradually fade over time, creating a sense of energy propagation throughout the system.
+
+Hover interaction provides a more subtle but continuous form of feedback. As the cursor moves across the canvas, nearby nodes become brighter and slightly larger based on their distance from the mouse. This distance-mapped interaction creates the impression of an invisible force field moving through the network, making the visual environment feel responsive and alive.
+
+The mechanic employs event-driven programming, timers, particle systems, distance mapping, and procedural animation techniques explored throughout the course. Together, the click and hover interactions transform the artwork from a passive visual display into an interactive experience where users can directly influence the behaviour and appearance of the generative system in real time.
 
 ---
 
@@ -166,7 +170,7 @@ project-folder/
 ├── time-mechanic.js
 ├── audio-mechanic.js
 ├── perlin-mechanic.js
-├── user-input-mechanic.js
+├── input-mechanic.js
 ├── assets/
 └── libraries/
     ├── p5.min.js
@@ -219,6 +223,12 @@ For the time-based version:
 4. **30–40 seconds:** Dark reset slows movement and fades the canvas.
 5. The cycle repeats every 40 seconds.
 
+## User Input Interaction
+Move the mouse across the canvas to activate nearby nodes.
+Hovering near nodes causes them to brighten and increase in visual intensity.
+Click anywhere on the canvas to generate a glowing halo pulse.
+Each click also creates particle bursts, radiating rays, and temporary connection lines between nearby nodes.
+Repeated clicks can create overlapping energy fields and complex visual interactions.
 
 # Part 6: AI Acknowledgement
 Optimised code comments and drafted a README document. This helped clarify the purpose of the functions, explained how p5.js’s timing logic works, and improved the structure of the project documentation.
