@@ -210,6 +210,26 @@ The project uses blend modes such as `BLEND`, `SCREEN`, `ADD`, and `OVERLAY`, to
 ## 7. Responsive Canvas
 
 The canvas uses `windowWidth`, `windowHeight`, and `windowResized()` so the artwork scales correctly when the browser window changes size. The helper function `unit()` uses the smaller side of the screen to keep proportions consistent.
+
+## 8. Randomised Shape Attributes
+
+`random()` is used to assign different properties to each geometric object. These properties include shape type, x and y position, size, width, height, colour hue, saturation, brightness, alpha value, line weight, rotation angle, movement range, and noise offsets. This creates visual variety without manually placing each shape.
+
+## 9. Regenerating the Layer
+
+The function `resetPerlinMechanic()` calls `initPerlinMechanic()` again when the user presses **P**. This clears the existing Perlin shape layer and creates a new arrangement. This technique gives the project a simple regeneration interaction while keeping the same CUDA-inspired visual style.
+
+## 10. Perlin Noise Offsets
+
+Each shape stores separate noise offset values for x movement, y movement, and rotation. These offset values are updated over time in `updatePerlinMechanic()`. This allows every shape to follow its own movement path instead of sharing one global animation.
+
+## 11. Independent Shape Transformation
+
+`push()` and `pop()` are used around each shape so that translation and rotation only affect the current object. `translate()` moves each shape to its calculated position, while `rotate()` applies both its original random angle and its Perlin-based rotation offset. This makes every object behave as an independent visual element.
+
+## 12. Geometric Drawing
+
+The layer uses basic p5.js drawing functions including `ellipse()`, `rect()`, `triangle()`, and `line()`. These shapes were chosen because they match the visual language of the CUDA reference, which relies on overlapping geometric fragments, transparent forms, and abstract composition.
 \\\\
 
 ---
@@ -229,6 +249,9 @@ Hovering near nodes causes them to brighten and increase in visual intensity.
 Click anywhere on the canvas to generate a glowing halo pulse.
 Each click also creates particle bursts, radiating rays, and temporary connection lines between nearby nodes.
 Repeated clicks can create overlapping energy fields and complex visual interactions.
+
+## Perlin Noise and Randomness
+My mechanic uses random values to generate CUDA-inspired geometric shapes with different positions, sizes, colours, opacity, and rotations. Perlin noise makes these shapes drift and rotate smoothly, creating a natural floating effect. The user can press **P** to regenerate this layer and create a new random composition. This adds movement, depth, and controlled randomness to the overall abstract visual system.
 
 # Part 6: AI Acknowledgement
 Optimised code comments and drafted a README document. This helped clarify the purpose of the functions, explained how p5.js’s timing logic works, and improved the structure of the project documentation.
