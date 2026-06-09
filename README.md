@@ -175,10 +175,7 @@ project-folder/
 ├── audio-mechanic.js
 ├── perlin-mechanic.js
 ├── input-mechanic.js
-<<<<<<< HEAD
 ├── background-layer.js
-=======
->>>>>>> 76fcadf70c84770aed9bcb913e0db9b55cf28e3a
 ├── assets/
 └── libraries/
     ├── p5.min.js
