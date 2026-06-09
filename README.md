@@ -176,6 +176,7 @@ project-folder/
 ├── perlin-mechanic.js
 ├── input-mechanic.js
 ├── background-layer.js
+├── random-shapes.js
 ├── assets/
 └── libraries/
     ├── p5.min.js
